@@ -36,13 +36,13 @@
 
 /** RF24L01硬件接口定义 */
 #define RF24L01_CE_GPIO_PORT			CE_GPIO_Port
-#define RF24L01_CE_GPIO_PIN				CE_Pin
+#define RF24L01_CE_GPIO_PIN			CE_Pin
 
 #define RF24L01_IRQ_GPIO_PORT			IRQ_GPIO_Port
 #define RF24L01_IRQ_GPIO_PIN			IRQ_Pin
 
 #define RF24L01_CS_GPIO_PORT			SPI_NSS_GPIO_Port
-#define RF24L01_CS_GPIO_PIN				SPI_NSS_Pin
+#define RF24L01_CS_GPIO_PIN			SPI_NSS_Pin
 
 
 /** 口线操作函数定义 */

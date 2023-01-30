@@ -9,5 +9,5 @@
 #define NRF24L01_SYNC_H_
 void sync_init();
 void read_reg();
-#define nrf_rx
+//#define nrf_rx
 #endif /* NRF24L01_SYNC_H_ */

@@ -25,7 +25,7 @@ void task_init()
 	uart_dma_init();
 	can_filter_init();
 	chassis_init(&chassis);
-	sync_init();
+	//sync_init();
 	HAL_Delay(1000);
 
  HAL_TIM_Base_Start_IT(&htim3);

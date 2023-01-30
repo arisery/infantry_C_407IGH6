@@ -94,13 +94,16 @@ void HAL_UART_IdleCpltCallback(UART_HandleTypeDef *huart)
 		HAL_UART_Receive_DMA(huart, (uint8_t*) &SBUS_rx_buf[0], 36);
 
 	}
-
+/*
 #ifdef nrf_rx
 
 #else
 	NRF24L01_Write_Tx_Payload_NoAck(SBUS_rx_buf, 18);
 #endif
+*/
 }
+
+
  void SBUS_TO_RC(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl)
 {
 	if (sbus_buf == NULL || rc_ctrl == NULL)

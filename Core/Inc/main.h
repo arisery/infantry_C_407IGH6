@@ -70,8 +70,16 @@ void Error_Handler(void);
 #define LED_B_GPIO_Port GPIOH
 #define KEY_Pin GPIO_PIN_0
 #define KEY_GPIO_Port GPIOA
+#define CS1_Accel_Pin GPIO_PIN_4
+#define CS1_Accel_GPIO_Port GPIOA
+#define INT1_Accel_Pin GPIO_PIN_4
+#define INT1_Accel_GPIO_Port GPIOC
+#define INT1_Gyro_Pin GPIO_PIN_5
+#define INT1_Gyro_GPIO_Port GPIOC
 #define SPI_NSS_Pin GPIO_PIN_12
 #define SPI_NSS_GPIO_Port GPIOB
+#define CS1_Gyro_Pin GPIO_PIN_0
+#define CS1_Gyro_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
