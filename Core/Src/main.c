@@ -136,42 +136,7 @@ int i;
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
-  { HAL_Delay(10);
-
-
-/*
-	uint16_t irq_flag,lenth;
-		irq_flag = NRF24L01_Read_Reg( STATUS);		//读状态寄存器
-		//清中断标�???????????????????
-		if (irq_flag)	//接收到数�???????????????????& RX_OK
-		{
-			NRF24L01_Write_Reg( STATUS, irq_flag);
-
-			lenth= NRF24L01_Read_Rx_Payload((uint8_t*)&nrf_rx_buff);
-printf("lenth:%d,irq:%d",lenth,irq_flag);
-HAL_Delay(100);
-//HAL_UART_Transmit(&huart1, (uint8_t*)&nrf_rx_buff, 18, 0xfff);
-
-irq_flag=0;
-		}
-		*/
-	//	NRF24L01_Read_Reg( STATUS);
-
-/*
-		NRF24L01_Flush_Rx_Fifo();
- NRF24L01_Clear_IRQ_Flag( IRQ_ALL);
-*/
-  /*
-	  for(i=0;i<5;i++)
-	  {
-	  NRF24L01_Write_Tx_Payload_NoAck((uint8_t*)&nrf_buff[i], 18);
-		NRF24L01_Clear_IRQ_Flag( IRQ_ALL );
-	 HAL_Delay(1000);
-
-	  }
-*/
-//
-  read_reg();
+  {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
