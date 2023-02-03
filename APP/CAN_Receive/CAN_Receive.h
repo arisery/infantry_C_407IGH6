@@ -9,7 +9,8 @@
 #define CAN_RECEIVE_H_
 #include "main.h"
 
-#define FEEDBACK_ID_BASE      0x200
+#define FEEDBACK_ID_BASE_3508_     0x200
+#define FEEDBACK_ID_BASE_6020      0x204
 #define CAN_CONTROL_ID_BASE   0x1ff
 #define CAN_CONTROL_ID_EXTEND 0x2ff
 #define MOTOR_MAX_NUM         4
@@ -36,6 +37,8 @@ typedef struct
 	uint16_t offset_ecd;
 	int16_t round;
     float angle ,last_angle;
+    float angular_velocity;
+    float angular_velocity_set;
 }motor_t;
 void can_filter_init();
 //返回底盘电机变量地址，通过指针方式获取原始数据,i的范围是0-3，对应0x201-0x204,

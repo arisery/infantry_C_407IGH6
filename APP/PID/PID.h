@@ -8,7 +8,7 @@
 #ifndef PID_H_
 #define PID_H_
 #include"main.h"
-#include"gimbal.h"
+
 #define LimitMax(input, max)   \
     {                          \
         if (input > max)       \
@@ -49,15 +49,15 @@ typedef struct
     float Dbuf[3];  //微分项 0最新 1上一次 2上上次
     float error[3]; //误差项 0最新 1上一次 2上上次
 
-} pid_struct_t;
+} PID_t;
 
- void PID_Init(pid_struct_t *pid, int mode, const float PID[3], float max_out, float max_iout);
-void pid_angle_init(pid_struct_t *pid, float kp, float ki, float kd,
+ void PID_Init(PID_t *pid, int mode, const float PID[3], float max_out, float max_iout);
+void pid_angle_init(PID_t *pid, float kp, float ki, float kd,
 		float i_max, float out_max);
-void pid_speed_init(pid_struct_t *pid, float kp, float ki, float kd,
+void pid_speed_init(PID_t *pid, float kp, float ki, float kd,
 		float i_max, float out_max);
 
-float PID_Calc(pid_struct_t *pid, float ref, float set);
-void PID_clear(pid_struct_t *pid);
+float PID_Calc(PID_t *pid, float ref, float set);
+void PID_clear(PID_t *pid);
 
 #endif /* PID_H_ */

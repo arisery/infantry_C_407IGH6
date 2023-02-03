@@ -31,9 +31,10 @@ typedef enum {
 }gimbal_axis_e;
 typedef struct {
 
-
+PID_t	pid_angle,pid_speed;
 	motor_t motor;
-    float angular_velocity,angular_velocity_set,acceleration;
+
+    float acceleration;
     int16_t set_current;
 
 }gimbal_axis_t;

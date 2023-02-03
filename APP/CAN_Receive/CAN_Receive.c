@@ -49,8 +49,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &rx_header, rx_data);
 
-		if ((rx_header.StdId >= FEEDBACK_ID_BASE)
-				&& (rx_header.StdId <= FEEDBACK_ID_BASE + MOTOR_MAX_NUM))
+		if ((rx_header.StdId >= FEEDBACK_ID_BASE_3508_)
+				&& (rx_header.StdId <= FEEDBACK_ID_BASE_3508_ + MOTOR_MAX_NUM))
 		{
 			can1_cnt++;
 			uint8_t index = rx_header.StdId - 0x201;
@@ -81,8 +81,8 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO1, &rx_header, rx_data);
 
-		if ((rx_header.StdId >= FEEDBACK_ID_BASE)
-				&& (rx_header.StdId <= FEEDBACK_ID_BASE + MOTOR_MAX_NUM))
+		if ((rx_header.StdId >= FEEDBACK_ID_BASE_6020)
+				&& (rx_header.StdId <= FEEDBACK_ID_BASE_6020 + MOTOR_MAX_NUM))
 		{
 			can2_cnt++;
 			uint8_t index = rx_header.StdId - 0x201;
@@ -101,9 +101,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
 
 		}
-
 	}
-
 }
 
 //发送电机电压*
@@ -135,7 +133,7 @@ void set_motor_voltage_CAN2(int16_t v1, int16_t v2, int16_t v3, int16_t v4)
 	static CAN_TxHeaderTypeDef tx_header;
 	uint8_t tx_data[8];
 
-	tx_header.StdId = 0x200;
+	tx_header.StdId = 0x1FF;
 	tx_header.IDE = CAN_ID_STD;
 	tx_header.RTR = CAN_RTR_DATA;
 	tx_header.DLC = 8;

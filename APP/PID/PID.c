@@ -5,14 +5,14 @@
  *      Author: tl
  */
 #include"PID.h"
-pid_struct_t motor_pid[7];
+PID_t motor_pid[7];
 float target_speed[7];
 float target_angle=0,set_angle=5000;
 float flag=0;
 
 
 
-float PID_Calc(pid_struct_t *pid, float ref, float set)
+float PID_Calc(PID_t *pid, float ref, float set)
 {
     if (pid == NULL)
     {
@@ -50,7 +50,7 @@ float PID_Calc(pid_struct_t *pid, float ref, float set)
     return pid->out;
 }
 
-void PID_Init(pid_struct_t *pid, int mode, const float PID[3], float max_out, float max_iout)
+void PID_Init(PID_t *pid, int mode, const float PID[3], float max_out, float max_iout)
 {
     if (pid == NULL || PID == NULL)
     {
@@ -65,7 +65,7 @@ void PID_Init(pid_struct_t *pid, int mode, const float PID[3], float max_out, fl
     pid->Dbuf[0] = pid->Dbuf[1] = pid->Dbuf[2] = 0.0f;
     pid->error[0] = pid->error[1] = pid->error[2] = pid->Pout = pid->Iout = pid->Dout = pid->out = 0.0f;
 }
-void PID_clear(pid_struct_t *pid)
+void PID_clear(PID_t *pid)
 {
     if (pid == NULL)
     {

@@ -6,8 +6,9 @@
  */
 
 #include "gimbal.h"
+#include "main.h"
+#include "stm32f4xx_hal.h"
 gimbal_t gimbal;
-
 void gimbal_init()
 {
 
@@ -53,7 +54,7 @@ void gimbal_data_update(gimbal_t* gimbal_data)
 	//更新两个轴的角速度，将转速转换为弧度制的角速度
 	for(int i=0;i<2;i++)
 	{
-		gimbal_data->axis[i].angular_velocity=gimbal_data->axis[i].motor.motor_feedback->speed_rpm*GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY;
+		gimbal_data->axis[i].motor.angular_velocity=gimbal_data->axis[i].motor.motor_feedback->speed_rpm*GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY;
 	}
 	//更新当前两个轴的弧度制角度值
 	gimbal_data->gimbal_yaw=gimbal_data->axis[yaw].motor.encoder_value;
@@ -80,7 +81,22 @@ void gimbal_set_control(gimbal_t* gimbal_set)
 
 void gimbal_pid_control(gimbal_t* gimbal_pid)
 {
+	static uint32_t tick,last_tick,val,last_val;
+	static uint32_t load=168000;
+	float temp;
 
+
+	val =SysTick->VAL;
+	tick=HAL_GetTick();
+	temp=1000/((tick-last_tick)+((val-last_val)/load));
+	last_tick=tick;
+	last_val=val;
+	for(int i=0;i<2;i++)
+	{
+		gimbal_pid->axis[i].motor.angular_velocity=(gimbal_pid->axis[i].motor.angle-gimbal_pid->axis[i].motor.last_angle)*temp;
+		gimbal_pid->axis[i].motor.angular_velocity_set=PID_Calc(&gimbal_pid->axis[i].pid_angle, gimbal_pid->gimbal_yaw, gimbal_pid->gimbal_yaw_set);
+		gimbal_pid->axis[i].set_current=PID_Calc(&gimbal_pid->axis[i].pid_speed, gimbal_pid->axis[i].motor.angular_velocity, gimbal_pid->axis[i].motor.angular_velocity_set);
+	}
 }
 float motor_ecd_to_angle_change(motor_t *motor )
 {
@@ -107,5 +123,10 @@ float motor_ecd_to_angle_change(motor_t *motor )
 void gimbal_task()
 {
 
+	gimbal_mode_set(&gimbal);
+	gimbal_data_update(&gimbal);
+	gimbal_set_control(&gimbal);
+	gimbal_pid_control(&gimbal);
+	set_motor_voltage_CAN2(gimbal.axis[yaw].set_current, gimbal.axis[pitch].set_current, 0, 0);
 
 }

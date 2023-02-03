@@ -40,7 +40,7 @@ typedef struct {
 	const RC_ctrl_t *RC;//遥控器信息
 	chassis_mode move_mode,last_move_mode;
 	chassis_wheel_t wheel[4];//四个轮子信息
-	pid_struct_t motor_speed_pid[4];             //底盘电机速度pid
+	PID_t motor_speed_pid[4];             //底盘电机速度pid
 	first_order_filter_type_t chassis_cmd_slow_set_vx;
 	first_order_filter_type_t chassis_cmd_slow_set_vy;
 
