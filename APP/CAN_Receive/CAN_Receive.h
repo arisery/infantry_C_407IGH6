@@ -14,15 +14,29 @@
 #define CAN_CONTROL_ID_EXTEND 0x2ff
 #define MOTOR_MAX_NUM         4
 
+//电机编码值转化成角度值
+
+#define Motor_Ecd_to_Rad 0.000766990394f //      2*  PI  /8192
+
 typedef struct
 {
     uint16_t encoder_value;//电机编码器反馈的机械角度值
     int16_t speed_rpm;
     int16_t given_current;
     uint8_t temperate;
-    int16_t last_encoder_value;
+	uint16_t last_encoder_value;
+
+
 } motor_message_t;
 
+typedef struct
+{	motor_message_t* motor_feedback;
+	uint16_t encoder_value;
+	uint16_t last_encoder_value;
+	uint16_t offset_ecd;
+	int16_t round;
+    float angle ,last_angle;
+}motor_t;
 void can_filter_init();
 //返回底盘电机变量地址，通过指针方式获取原始数据,i的范围是0-3，对应0x201-0x204,
  const motor_message_t *get_Chassis_Motor_Measure_Point(uint8_t i);

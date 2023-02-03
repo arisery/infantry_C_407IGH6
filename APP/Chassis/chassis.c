@@ -6,10 +6,10 @@
  */
 
 
-#include "chassis.h"
+#include <chassis.h>
+#include <CAN_Receive.h>
 #include"remote_control.h"
 #include"lib.h"
-#include "CAN_Receive.h"
 chassis_struct_t chassis;
 uint32_t BIG_V,BIG_V_SET;
 /**
@@ -19,7 +19,7 @@ uint32_t BIG_V,BIG_V_SET;
  * 相反模式
  *
  */
-void mode_set(chassis_struct_t* chassis_t)
+void chassis_mode_set(chassis_struct_t* chassis_t)
 {
 
 	if(switch_is_down(chassis_t->RC->rc.s[0]))
@@ -47,7 +47,7 @@ void mode_set(chassis_struct_t* chassis_t)
  *
  *
  */
-void chassis_update(chassis_struct_t* chassis_update)
+void chassis_data_update(chassis_struct_t* chassis_update)
 {
 	if (chassis_update == NULL)
 	{
@@ -255,8 +255,8 @@ void chassis_mecanum_wheel_speed(const float vx_set,
 
 void chassis_task()
 {
-	mode_set(&chassis);
-	chassis_update(&chassis);
+	chassis_mode_set(&chassis);
+	chassis_data_update(&chassis);
 	chassis_set_contorl(&chassis);
 	chassis_pid_control(&chassis);
 	if((chassis.vx==0)&&(chassis.vy==0)&&(chassis.wz==0)&&(chassis.vx_set==0)&&(chassis.vy_set==0)&&(chassis.wz_set==0))
@@ -320,7 +320,7 @@ void chassis_init(chassis_struct_t *chassis_init_t)
 				chassis_init_t->wz_max_speed = NORMAL_MAX_CHASSIS_SPEED_Y;
 				chassis_init_t->wz_min_speed = -NORMAL_MAX_CHASSIS_SPEED_Y;
 				//更新一下数据
-				chassis_update(chassis_init_t);
+				chassis_data_update(chassis_init_t);
 
 
 }

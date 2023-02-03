@@ -7,8 +7,8 @@
 
 #ifndef CHASSIS_CHASSIS_H_
 #define CHASSIS_CHASSIS_H_
+#include <CAN_Receive.h>
 #include "remote_control.h"
-#include "CAN_Receive.h"
 #include "PID.h"
 #include"lib.h"
 
@@ -153,8 +153,8 @@ typedef struct {
 
 
 
-void mode_set(chassis_struct_t* chassis_t);
-void chassis_update(chassis_struct_t* chassis_update);
+void chassis_mode_set(chassis_struct_t* chassis_t);
+void chassis_data_update(chassis_struct_t* chassis_update);
 void chassis_set_contorl(chassis_struct_t *chassis_control);
 void chassis_rc_to_control_vector(float *vx_set, float *vy_set,chassis_struct_t *chassis_move_rc_to_vector);
 void chassis_pid_control(chassis_struct_t* chassis_pid);
