@@ -295,7 +295,7 @@ void chassis_init(chassis_struct_t *chassis_init_t)
 			 chassis_init_t->chassis_yaw_motor = get_yaw_motor_point();
 			 chassis_init_t->chassis_pitch_motor = get_pitch_motor_point();
 			 */
-			//初始化PID 运动
+			//初始化PID
 			for (i = 0; i < 4; i++)
 			{
 				chassis_init_t->wheel[i].chassis_motor =

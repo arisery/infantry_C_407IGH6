@@ -19,6 +19,7 @@
 #define PI 3.1415926535f
 #endif
 
+#define Motor_Ecd_to_Rad 0.000766990394f //      2*  PI  /8192
 
 typedef enum{
 only_pitch,//云台只有pitch轴方向运动，只能上下摆动
@@ -56,5 +57,5 @@ void gimbal_data_update(gimbal_t* gimbal_data);
 void gimbal_set_control(gimbal_t* gimbal_set);
 void gimbal_pid_control(gimbal_t* gimbal_pid);
 void gimbal_task();
-
+void gimbal_init();
 #endif /* GIMBAL_GIMBAL_H_ */

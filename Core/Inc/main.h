@@ -80,6 +80,7 @@ void Error_Handler(void);
 #define SPI_NSS_GPIO_Port GPIOB
 #define CS1_Gyro_Pin GPIO_PIN_0
 #define CS1_Gyro_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

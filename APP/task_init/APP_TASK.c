@@ -6,14 +6,15 @@
  */
 
 
+#include <APP_TASK.h>
 #include <chassis.h>
 #include <CAN_Receive.h>
-#include "../task_init/task.h"
 #include "main.h"
 #include"remote_control.h"
 #include"function.h"
 #include "drv_RF24L01.h"
 #include "sync.h"
+#include "gimbal.h"
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim6;
 extern chassis_struct_t chassis;
@@ -28,7 +29,7 @@ void task_init()
 	//sync_init();
 	HAL_Delay(1000);
 
- HAL_TIM_Base_Start_IT(&htim3);
+ //HAL_TIM_Base_Start_IT(&htim3);
  HAL_TIM_Base_Start(&htim6);
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)

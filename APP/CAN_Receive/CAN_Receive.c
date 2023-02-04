@@ -9,11 +9,13 @@
 #include "main.h"
 #include"function.h"
 #include"remote_control.h"
+#include "gimbal.h"
 extern CAN_HandleTypeDef hcan1, hcan2;
 static uint16_t can1_cnt = 0;
 static uint16_t can2_cnt = 0;
-static motor_message_t motor_chassis[4], gimbal[2];
-
+static motor_message_t motor_chassis[4], motor_gimbal[2];
+extern gimbal_t gimbal;
+void Motor_Message(uint8_t index,motor_message_t* motor,uint8_t *data);
 void can_filter_init()
 {
 	CAN_FilterTypeDef filter_structure;
@@ -49,17 +51,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &rx_header, rx_data);
 
-		if ((rx_header.StdId >= FEEDBACK_ID_BASE_3508_)
-				&& (rx_header.StdId <= FEEDBACK_ID_BASE_3508_ + MOTOR_MAX_NUM))
+		if ((rx_header.StdId >= FEEDBACK_ID_BASE_6020)
+				&& (rx_header.StdId <= FEEDBACK_ID_BASE_6020 + MOTOR_MAX_NUM))
 		{
 			can1_cnt++;
-			uint8_t index = rx_header.StdId - 0x201;
-			motor_chassis[index].last_encoder_value = motor_chassis[index].encoder_value;
-			motor_chassis[index].encoder_value = ((rx_data[0] << 8) | rx_data[1]);
-			motor_chassis[index].speed_rpm = ((rx_data[2] << 8) | rx_data[3]);
-			motor_chassis[index].given_current =
-					((rx_data[4] << 8) | rx_data[5]);
-			motor_chassis[index].temperate = rx_data[6];
+			uint8_t index = rx_header.StdId - 0x205;
+			Motor_Message(index, motor_gimbal, rx_data);
+			motor_ecd_to_angle_change(&gimbal.axis[index].motor);
 		}
 #ifdef DEBUG
 		if (can1_cnt == 300)
@@ -85,13 +83,8 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				&& (rx_header.StdId <= FEEDBACK_ID_BASE_6020 + MOTOR_MAX_NUM))
 		{
 			can2_cnt++;
-			uint8_t index = rx_header.StdId - 0x201;
-			gimbal[index].last_encoder_value = gimbal[index].encoder_value;
-			gimbal[index].encoder_value = ((rx_data[0] << 8) | rx_data[1]);
-			gimbal[index].speed_rpm = ((rx_data[2] << 8) | rx_data[3]);
-			gimbal[index].given_current =
-					((rx_data[4] << 8) | rx_data[5]);
-			gimbal[index].temperate = rx_data[6];
+			uint8_t index = rx_header.StdId - 0x205;
+			Motor_Message(index, motor_gimbal, rx_data);
 		}
 
 		if (can2_cnt == 300)
@@ -110,7 +103,7 @@ void set_motor_voltage_CAN1(int16_t v1, int16_t v2, int16_t v3, int16_t v4)
 	static CAN_TxHeaderTypeDef tx_header;
 	uint8_t tx_data[8];
 
-	tx_header.StdId = 0x200;
+	tx_header.StdId = 0x1FF;//0x200
 	tx_header.IDE = CAN_ID_STD;
 	tx_header.RTR = CAN_RTR_DATA;
 	tx_header.DLC = 8;
@@ -155,7 +148,17 @@ const motor_message_t* get_Chassis_Motor_Measure_Point(uint8_t i)
 {
 	return &motor_chassis[(i & 0x03)];
 }
-const motor_message_t* get_clamp_Motor_Measure_Point(uint8_t i)
+const motor_message_t* get_gimbal_Motor_Measure_Point(uint8_t i)
 {
-	return &gimbal[(i & 0x03)];
+	return &motor_gimbal[(i & 0x03)];
+}
+
+void Motor_Message(uint8_t index,motor_message_t* motor,uint8_t *data)
+{
+	motor[index].last_encoder_value = motor[index].encoder_value;
+			motor[index].encoder_value = ((data[0] << 8) | data[1]);
+			motor[index].speed_rpm = ((data[2] << 8) | data[3]);
+			motor[index].given_current =
+					((data[4] << 8) | data[5]);
+			motor[index].temperate = data[6];
 }

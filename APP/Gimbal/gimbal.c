@@ -8,9 +8,23 @@
 #include "gimbal.h"
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "CAN_Receive.h"
+
 gimbal_t gimbal;
 void gimbal_init()
-{
+{	float PID_Angle[3]={1,1,1},PID_Speed[3]={1,1,1};
+
+	gimbal.RC= get_remote_control_point();
+	for(int i=0;i<2;i++)
+	{
+		gimbal.axis[i].motor.motor_feedback=get_gimbal_Motor_Measure_Point(i);
+		PID_clear(&gimbal.axis[i].pid_angle);
+		PID_clear(&gimbal.axis[i].pid_speed);
+		PID_Init(&gimbal.axis[i].pid_angle,PID_POSITION,PID_Angle,5000,3000);
+		PID_Init(&gimbal.axis[i].pid_speed,PID_POSITION,PID_Speed,16000,3000);
+		gimbal.axis[i].motor.offset_ecd=gimbal.axis[i].motor.motor_feedback->encoder_value;
+}
+
 
 }
 /*设置云台的模式
@@ -55,6 +69,14 @@ void gimbal_data_update(gimbal_t* gimbal_data)
 	for(int i=0;i<2;i++)
 	{
 		gimbal_data->axis[i].motor.angular_velocity=gimbal_data->axis[i].motor.motor_feedback->speed_rpm*GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY;
+		gimbal_data->axis[i].motor.last_angle=gimbal_data->axis[i].motor.angle;
+		gimbal_data->axis[i].motor.last_encoder_value=gimbal_data->axis[i].motor.encoder_value;
+		gimbal_data->axis[i].motor.angle=gimbal_data->axis[i].motor.motor_feedback->encoder_value;
+		gimbal_data->axis[i].motor.angle=gimbal_data->axis[i].motor.round*2*PI+ \
+				(gimbal_data->axis[i].motor.encoder_value-gimbal_data->axis[i].motor.offset_ecd)*Motor_Ecd_to_Rad;
+
+
+
 	}
 	//更新当前两个轴的弧度制角度值
 	gimbal_data->gimbal_yaw=gimbal_data->axis[yaw].motor.encoder_value;
@@ -105,7 +127,7 @@ float motor_ecd_to_angle_change(motor_t *motor )
 		 return 1;
 	 }
 	int16_t temp;
-	temp=motor->encoder_value-motor->last_encoder_value;
+	temp=motor->motor_feedback->encoder_value-motor->motor_feedback->last_encoder_value;
 
 	if(temp>4000)
 	{
@@ -115,7 +137,6 @@ float motor_ecd_to_angle_change(motor_t *motor )
 	{
 		motor->round++;
 	}
-	motor->angle=motor->round*2*PI+(motor->encoder_value-motor->offset_ecd)*Motor_Ecd_to_Rad;
 
 	return 0;
 }
@@ -127,6 +148,6 @@ void gimbal_task()
 	gimbal_data_update(&gimbal);
 	gimbal_set_control(&gimbal);
 	gimbal_pid_control(&gimbal);
-	set_motor_voltage_CAN2(gimbal.axis[yaw].set_current, gimbal.axis[pitch].set_current, 0, 0);
+	//set_motor_voltage_CAN2(gimbal.axis[yaw].set_current, gimbal.axis[pitch].set_current, 0, 0);
 
 }
