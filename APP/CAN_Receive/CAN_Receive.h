@@ -38,12 +38,13 @@ typedef struct
 	int16_t round;
     float angle ,last_angle;
     float angular_velocity;
+    float last_angular_velocity;
     float angular_velocity_set;
 }motor_t;
 void can_filter_init();
 //返回底盘电机变量地址，通过指针方式获取原始数据,i的范围是0-3，对应0x201-0x204,
- const motor_message_t *get_Chassis_Motor_Measure_Point(uint8_t i);
- const motor_message_t* get_gimbal_Motor_Measure_Point(uint8_t i);
+  motor_message_t *get_Chassis_Motor_Measure_Point(uint8_t i);
+  motor_message_t* get_gimbal_Motor_Measure_Point(uint8_t i);
  void set_motor_voltage_CAN1( int16_t v1, int16_t v2, int16_t v3,int16_t v4);
  void set_motor_voltage_CAN2(int16_t v1, int16_t v2, int16_t v3, int16_t v4);
 #endif /* CAN_RECEIVE_H_ */

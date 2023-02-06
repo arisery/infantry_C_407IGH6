@@ -36,6 +36,7 @@
 #include "sync.h"
 #include "stdio.h"
 #include "gimbal.h"
+#include <APP_TASK.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,7 +96,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-int i;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/

@@ -144,11 +144,11 @@ void set_motor_voltage_CAN2(int16_t v1, int16_t v2, int16_t v3, int16_t v4)
 
 }
 //返回底盘电机变量地址，通过指针方式获取原始数据
-const motor_message_t* get_Chassis_Motor_Measure_Point(uint8_t i)
+ motor_message_t* get_Chassis_Motor_Measure_Point(uint8_t i)
 {
 	return &motor_chassis[(i & 0x03)];
 }
-const motor_message_t* get_gimbal_Motor_Measure_Point(uint8_t i)
+ motor_message_t* get_gimbal_Motor_Measure_Point(uint8_t i)
 {
 	return &motor_gimbal[(i & 0x03)];
 }

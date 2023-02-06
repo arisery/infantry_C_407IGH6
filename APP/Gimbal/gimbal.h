@@ -12,14 +12,14 @@
 #include "PID.h"
 #include"lib.h"
 
-#define GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY 2*3.1415926f/60
+#define GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY 60.0f
 #define YAW_CHANNEL_TO_ANGLE 0.00025866f
 
 #ifndef PI
 #define PI 3.1415926535f
 #endif
 
-#define Motor_Ecd_to_Rad 0.000766990394f //      2*  PI  /8192
+#define Motor_Ecd_to_Angle 360.0f/8192.0f //      2*  PI  /8192
 
 typedef enum{
 only_pitch,//云台只有pitch轴方向运动，只能上下摆动

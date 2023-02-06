@@ -152,7 +152,7 @@ void Gimbal_TASK(void const * argument)
   {
 	 // Toggle_LED_R;
 	  gimbal_task();
-    osDelay(3);
+    osDelay(5);
   }
   /* USER CODE END Gimbal_TASK */
 }
