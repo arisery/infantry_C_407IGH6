@@ -62,6 +62,8 @@ void Error_Handler(void);
 #define IRQ_Pin GPIO_PIN_1
 #define IRQ_GPIO_Port GPIOF
 #define IRQ_EXTI_IRQn EXTI1_IRQn
+#define RSTN_IST8310_Pin GPIO_PIN_6
+#define RSTN_IST8310_GPIO_Port GPIOG
 #define LED_R_Pin GPIO_PIN_12
 #define LED_R_GPIO_Port GPIOH
 #define LED_G_Pin GPIO_PIN_11

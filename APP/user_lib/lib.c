@@ -11,6 +11,7 @@
 
 
 //快速开方
+/*
 float invSqrt(float num)
 {
     float halfnum = 0.5f * num;
@@ -21,7 +22,7 @@ float invSqrt(float num)
     y = y * (1.5f - (halfnum * y * y));
     return y;
 }
-
+*/
 /**
   * @brief          斜波函数初始化
   * @author         RM

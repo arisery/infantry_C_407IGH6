@@ -27,6 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "gimbal.h"
 #include"function.h"
+#include "IMU_C.h"
+#include "gimbal.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,10 +48,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+extern gimbal_t gimbal;
+float PITCH,ROLL;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId GimbalHandle;
+osThreadId myTask03Handle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -58,6 +62,7 @@ osThreadId GimbalHandle;
 
 void StartDefaultTask(void const * argument);
 void Gimbal_TASK(void const * argument);
+void GYRO(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -112,6 +117,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(Gimbal, Gimbal_TASK, osPriorityNormal, 0, 512);
   GimbalHandle = osThreadCreate(osThread(Gimbal), NULL);
 
+  /* definition and creation of myTask03 */
+  osThreadDef(myTask03, GYRO, osPriorityNormal, 0, 512);
+  myTask03Handle = osThreadCreate(osThread(myTask03), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -155,6 +164,28 @@ void Gimbal_TASK(void const * argument)
     osDelay(5);
   }
   /* USER CODE END Gimbal_TASK */
+}
+
+/* USER CODE BEGIN Header_GYRO */
+/**
+* @brief Function implementing the myTask03 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_GYRO */
+void GYRO(void const * argument)
+{
+  /* USER CODE BEGIN GYRO */
+IMU_Init();
+IMU_Start();
+
+  /* Infinite loop */
+  for(;;)
+  {
+	  IMU_Data_Fusion_Mahony(0.005,&ROLL,&PITCH,&gimbal.gimbal_yaw_set);
+    osDelay(5);
+  }
+  /* USER CODE END GYRO */
 }
 
 /* Private application code --------------------------------------------------*/

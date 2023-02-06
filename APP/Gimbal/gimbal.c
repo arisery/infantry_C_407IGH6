@@ -130,7 +130,7 @@ void gimbal_pid_control(gimbal_t* gimbal_pid)
 				{
 					gimbal.axis[i].motor.angular_velocity=a;
 				}
-				gimbal_pid->gimbal_yaw_set=0;
+				//gimbal_pid->gimbal_yaw_set=0;
 		gimbal_pid->axis[i].motor.angular_velocity_set=PID_Calc(&gimbal_pid->axis[i].pid_angle, gimbal_pid->gimbal_yaw, gimbal_pid->gimbal_yaw_set);
 		//gimbal_pid->axis[i].motor.angular_velocity_set=0;
 		gimbal_pid->axis[i].set_current=PID_Calc(&gimbal_pid->axis[i].pid_speed, gimbal_pid->axis[i].motor.angular_velocity, gimbal_pid->axis[i].motor.angular_velocity_set);
