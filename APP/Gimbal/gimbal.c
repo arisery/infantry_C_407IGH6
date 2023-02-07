@@ -12,7 +12,7 @@
 float time=0,val_an;
 gimbal_t gimbal;
 void gimbal_init()
-{	float PID_Angle[3]={12,0.05,0.5},PID_Speed[3]={18,3.5,5};
+{	float PID_Angle[3]={12,0.05,0},PID_Speed[3]={18,3.5,0};
 
 	gimbal.RC= get_remote_control_point();
 	for(int i=0;i<2;i++)

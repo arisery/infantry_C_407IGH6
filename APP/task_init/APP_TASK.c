@@ -15,7 +15,7 @@
 #include "drv_RF24L01.h"
 #include "sync.h"
 #include "gimbal.h"
-extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim3,htim2;
 extern TIM_HandleTypeDef htim6;
 extern chassis_struct_t chassis;
 uint32_t tim6cnt;
@@ -30,16 +30,18 @@ void task_init()
 	HAL_Delay(1000);
 
  //HAL_TIM_Base_Start_IT(&htim3);
- HAL_TIM_Base_Start(&htim6);
+ //HAL_TIM_Base_Start(&htim6);
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-
+	if (htim->Instance == TIM2) {
+	    HAL_IncTick();
+	  }
 if(htim==&htim3)
 {
 
 	TIM6->CNT=0;
-	__HAL_TIM_ENABLE(&htim6);
+	//__HAL_TIM_ENABLE(&htim6);
 
 	chassis_task();
 #ifdef nrf_rx

@@ -165,7 +165,7 @@ void IMU_Data_Fusion_Mahony(float dt, float *roll, float *pitch, float *yaw)
 {
 
 	IMU_GetData();
-	IMU_Temperature_Compensate();
+	//IMU_Temperature_Compensate();
 	//未开始执行IMU功能,直接返回
 	if (IMU_START_STATUS == Status_ERROR)
 	{
@@ -173,7 +173,7 @@ void IMU_Data_Fusion_Mahony(float dt, float *roll, float *pitch, float *yaw)
 	}
 
 
-		//互补滤波系数
+		//互补滤波系数f
 //	static float Kp = 2.0;
 //	static float Ki = 0.01;
 

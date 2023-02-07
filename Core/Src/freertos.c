@@ -29,6 +29,7 @@
 #include"function.h"
 #include "IMU_C.h"
 #include "gimbal.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +50,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 extern gimbal_t gimbal;
-float PITCH,ROLL;
+float PITCH,ROLL,YAW;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId GimbalHandle;
@@ -69,6 +70,9 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
 void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
 
+/* GetTimerTaskMemory prototype (linked to static allocation support) */
+void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize );
+
 /* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
 static StaticTask_t xIdleTaskTCBBuffer;
 static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
@@ -81,6 +85,19 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
   /* place for user code */
 }
 /* USER CODE END GET_IDLE_TASK_MEMORY */
+
+/* USER CODE BEGIN GET_TIMER_TASK_MEMORY */
+static StaticTask_t xTimerTaskTCBBuffer;
+static StackType_t xTimerStack[configTIMER_TASK_STACK_DEPTH];
+
+void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize )
+{
+  *ppxTimerTaskTCBBuffer = &xTimerTaskTCBBuffer;
+  *ppxTimerTaskStackBuffer = &xTimerStack[0];
+  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+  /* place for user code */
+}
+/* USER CODE END GET_TIMER_TASK_MEMORY */
 
 /**
   * @brief  FreeRTOS initialization
@@ -140,7 +157,8 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+
+    osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -175,15 +193,34 @@ void Gimbal_TASK(void const * argument)
 /* USER CODE END Header_GYRO */
 void GYRO(void const * argument)
 {
+	extern TIM_HandleTypeDef htim6;
   /* USER CODE BEGIN GYRO */
+	int i=1;
+	uint16_t tick,temp;
+	uint32_t gyro_tick;
 IMU_Init();
 IMU_Start();
+HAL_TIM_Base_Start(&htim6);
 
   /* Infinite loop */
   for(;;)
   {
-	  IMU_Data_Fusion_Mahony(0.005,&ROLL,&PITCH,&gimbal.gimbal_yaw_set);
-    osDelay(5);
+temp=TIM6->CNT-tick;
+	  printf("%u\r\n",temp);
+	  gyro_tick=osKernelSysTick();
+	  tick=TIM6->CNT;
+	  if(i%100==0)
+	  {
+		  Toggle_LED_R;
+	  }
+
+	  IMU_Data_Fusion_Mahony(0.015f,&ROLL,&PITCH,&YAW);
+
+gimbal.gimbal_yaw_set=-YAW;
+i++;
+	 // osDelayUntil(&gyro_tick,5);
+	  osDelay(5);
+
   }
   /* USER CODE END GYRO */
 }
