@@ -26,16 +26,17 @@ void task_init()
 	uart_dma_init();
 	can_filter_init();
 	chassis_init(&chassis);
+	//gimbal_init();
 	//sync_init();
 	HAL_Delay(1000);
-
- //HAL_TIM_Base_Start_IT(&htim3);
+	vision_RX_init();
+// HAL_TIM_Base_Start_IT(&htim3);
  //HAL_TIM_Base_Start(&htim6);
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == TIM2) {
-	    HAL_IncTick();
+	   // HAL_IncTick();
 	  }
 if(htim==&htim3)
 {
@@ -44,6 +45,7 @@ if(htim==&htim3)
 	//__HAL_TIM_ENABLE(&htim6);
 
 	chassis_task();
+	 gimbal_task();
 #ifdef nrf_rx
 
 	NRF24L01_Flush_Rx_Fifo();

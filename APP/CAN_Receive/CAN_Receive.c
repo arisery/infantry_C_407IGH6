@@ -57,7 +57,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			can1_cnt++;
 			uint8_t index = rx_header.StdId - 0x205;
 			Motor_Message(index, motor_gimbal, rx_data);
-			motor_ecd_to_angle_change(&gimbal.axis[index].motor);
+			//motor_ecd_to_angle_change(&gimbal.axis[index].motor);
 		}
 #ifdef DEBUG
 		if (can1_cnt == 300)
@@ -85,6 +85,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			can2_cnt++;
 			uint8_t index = rx_header.StdId - 0x205;
 			Motor_Message(index, motor_gimbal, rx_data);
+			motor_ecd_to_angle_change(&gimbal.axis[index].motor);
 		}
 
 		if (can2_cnt == 300)
@@ -161,4 +162,5 @@ void Motor_Message(uint8_t index,motor_message_t* motor,uint8_t *data)
 			motor[index].given_current =
 					((data[4] << 8) | data[5]);
 			motor[index].temperate = data[6];
+
 }

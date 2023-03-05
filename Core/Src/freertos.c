@@ -51,6 +51,7 @@
 /* USER CODE BEGIN Variables */
 extern gimbal_t gimbal;
 float PITCH,ROLL,YAW;
+extern TIM_HandleTypeDef htim6;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId GimbalHandle;
@@ -193,7 +194,6 @@ void Gimbal_TASK(void const * argument)
 /* USER CODE END Header_GYRO */
 void GYRO(void const * argument)
 {
-	extern TIM_HandleTypeDef htim6;
   /* USER CODE BEGIN GYRO */
 	int i=1;
 	uint16_t tick,temp;
@@ -206,7 +206,7 @@ HAL_TIM_Base_Start(&htim6);
   for(;;)
   {
 temp=TIM6->CNT-tick;
-	  printf("%u\r\n",temp);
+	 // printf("%u\r\n",temp);
 	  gyro_tick=osKernelSysTick();
 	  tick=TIM6->CNT;
 	  if(i%100==0)
@@ -216,7 +216,7 @@ temp=TIM6->CNT-tick;
 
 	  IMU_Data_Fusion_Mahony(0.015f,&ROLL,&PITCH,&YAW);
 
-gimbal.gimbal_yaw_set=-YAW;
+//gimbal.gimbal_yaw_set=-YAW;
 i++;
 	 // osDelayUntil(&gyro_tick,5);
 	  osDelay(5);

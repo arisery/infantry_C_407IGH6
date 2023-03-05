@@ -172,6 +172,20 @@ void IMU_Data_Fusion_Mahony(float dt, float *roll, float *pitch, float *yaw)
 		return;
 	}
 
+	static LOW_PASS_FILTER_Typedef s_lpf_struct[3] = {
+			{
+					.frame_period = 0.015,
+					.filter_factor = 0.04
+			},
+			{
+				.frame_period = 0.015,
+				.filter_factor = 0.04
+			},
+			{
+				.frame_period = 0.015,
+				.filter_factor = 0.04
+			}
+	};
 
 		//互补滤波系数f
 //	static float Kp = 2.0;
@@ -299,9 +313,9 @@ void IMU_Data_Fusion_Mahony(float dt, float *roll, float *pitch, float *yaw)
 	g4 = 2.0f * (q1 * q2 + q0 * q3);
 	g5 = q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3;
 
-	*roll = atan2f(g2,g3) * 57.29578;
-	*pitch = -asinf(g1) * 57.29578;
-	*yaw = atan2f(g4, g5) * 57.29578;
+	*roll = low_pass_filter(&s_lpf_struct[0], atan2f(g2,g3) * 57.29578);
+	*pitch = low_pass_filter(&s_lpf_struct[1], -asinf(g1) * 57.29578);
+	*yaw = low_pass_filter(&s_lpf_struct[2], atan2f(g4, g5) * 57.29578);
 
 }
 
