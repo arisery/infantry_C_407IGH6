@@ -15,6 +15,8 @@
 #include "drv_RF24L01.h"
 #include "sync.h"
 #include "gimbal.h"
+#include "Shoot.h"
+
 extern TIM_HandleTypeDef htim3,htim2;
 extern TIM_HandleTypeDef htim6;
 extern chassis_struct_t chassis;
@@ -25,11 +27,12 @@ void task_init()
 
 	uart_dma_init();
 	can_filter_init();
-	chassis_init(&chassis);
+	//chassis_init(&chassis);
 	//gimbal_init();
 	//sync_init();
 	HAL_Delay(1000);
 	vision_RX_init();
+
 // HAL_TIM_Base_Start_IT(&htim3);
  //HAL_TIM_Base_Start(&htim6);
 }

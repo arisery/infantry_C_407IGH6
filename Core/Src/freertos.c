@@ -29,6 +29,9 @@
 #include"function.h"
 #include "IMU_C.h"
 #include "gimbal.h"
+#include "Shoot.h"
+#include <chassis.h>
+
 #include "stdio.h"
 /* USER CODE END Includes */
 
@@ -49,22 +52,30 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+extern chassis_struct_t chassis;
 extern gimbal_t gimbal;
 float PITCH,ROLL,YAW;
 extern TIM_HandleTypeDef htim6;
+osThreadId ChassisHandle;
+osThreadId ShootHandle;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId GimbalHandle;
 osThreadId myTask03Handle;
+osThreadId myTask04Handle;
+osThreadId myTask05Handle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-
+void Shoot_TASK(void const * argument);
+void Chassis_TASK(void const * argument);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
 void Gimbal_TASK(void const * argument);
 void GYRO(void const * argument);
+void Chassis_TASK(void const * argument);
+void Shoot_TASK(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -139,8 +150,17 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(myTask03, GYRO, osPriorityNormal, 0, 512);
   myTask03Handle = osThreadCreate(osThread(myTask03), NULL);
 
+  /* definition and creation of myTask04 */
+  osThreadDef(myTask04, Chassis_TASK, osPriorityNormal, 0, 1024);
+  myTask04Handle = osThreadCreate(osThread(myTask04), NULL);
+
+  /* definition and creation of myTask05 */
+  osThreadDef(myTask05, Shoot_TASK, osPriorityNormal, 0, 1024);
+  myTask05Handle = osThreadCreate(osThread(myTask05), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -223,6 +243,47 @@ i++;
 
   }
   /* USER CODE END GYRO */
+}
+
+/* USER CODE BEGIN Header_Chassis_TASK */
+/**
+* @brief Function implementing the myTask04 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Chassis_TASK */
+void Chassis_TASK(void const * argument)
+{
+  /* USER CODE BEGIN Chassis_TASK */
+	chassis_init(&chassis);
+  /* Infinite loop */
+  for(;;)
+  {
+		chassis_task();
+			  osDelay(5);
+  }
+  /* USER CODE END Chassis_TASK */
+}
+
+/* USER CODE BEGIN Header_Shoot_TASK */
+/**
+* @brief Function implementing the myTask05 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Shoot_TASK */
+void Shoot_TASK(void const * argument)
+{
+  /* USER CODE BEGIN Shoot_TASK */
+	shoot_init();
+  /* Infinite loop */
+  for(;;)
+  {
+	  shoot_task();
+		  osDelay(5);
+
+  }
+  /* USER CODE END Shoot_TASK */
 }
 
 /* Private application code --------------------------------------------------*/

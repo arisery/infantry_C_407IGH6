@@ -65,6 +65,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IMU_C}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IST8310}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/PID_primary}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Shoot}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.379090217" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -161,6 +162,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IMU_C}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IST8310}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/PID_primary}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Shoot}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.93487991" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

@@ -7,6 +7,7 @@
 
 #include "gimbal.h"
 #include "main.h"
+#include "Shoot.h"
 #include "usart.h"
 #include "stm32f4xx_hal.h"
 #include "CAN_Receive.h"
@@ -19,10 +20,6 @@ void gimbal_init()
 {
 	float yaw_PID_Angle[3] ={ 35, 0.07, 0 }, yaw_PID_Speed[3] ={ 20, 2.5, 0 },
 			pitch_PID_Angle[3] ={ 45, 0.07, 0 }, pitch_PID_Speed[3] ={ 22, 2.5, 0 };
-
-
-
-
 
 	gimbal.RC = get_remote_control_point();
 	for (int i = 0; i < 2; i++)
@@ -48,11 +45,12 @@ void gimbal_init()
 		}
 		gimbal.axis[i].motor.round = 0;
 	}
-	while (gimbal.axis[yaw].motor.offset_ecd == NULL)
-	{
-		gimbal.axis[yaw].motor.offset_ecd =
-				gimbal.axis[yaw].motor.motor_feedback->encoder_value;
-	}
+//	while (gimbal.axis[yaw].motor.offset_ecd == NULL)
+//	{
+//		gimbal.axis[yaw].motor.offset_ecd =
+//				gimbal.axis[yaw].motor.motor_feedback->encoder_value;
+//	}
+	gimbal.axis[yaw].motor.offset_ecd =5810;
 	gimbal.axis[pitch].motor.offset_ecd = 3260;
 }
 /*设置云台的模式
@@ -63,6 +61,7 @@ void gimbal_mode_set(gimbal_t *gimbal_mode)
 {
 	//gimbal_mode->mode=omnidirectional;
 
+		gimbal_mode->last_mode = gimbal_mode->mode;
 	if (switch_is_down(gimbal_mode->RC->rc.s[0]))
 	{
 		gimbal_mode->mode = omnidirectional;
@@ -78,7 +77,7 @@ void gimbal_mode_set(gimbal_t *gimbal_mode)
 		gimbal_mode->mode = only_pitch;
 
 	}
-	gimbal_mode->last_mode = gimbal_mode->mode;
+
 
 }
 /*
@@ -95,9 +94,9 @@ void gimbal_data_update(gimbal_t *gimbal_data)
 	//更新两个轴的角速度，将转速转换为弧度制的角速度
 	for (int i = 0; i < 2; i++)
 	{
-		gimbal_data->axis[i].motor.angular_velocity =
-				gimbal_data->axis[i].motor.motor_feedback->speed_rpm
-						* GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY;
+//		gimbal_data->axis[i].motor.angular_velocity =
+//				gimbal_data->axis[i].motor.motor_feedback->speed_rpm
+//						* GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY;
 		gimbal_data->axis[i].motor.last_angle =
 				gimbal_data->axis[i].motor.angle;
 		gimbal_data->axis[i].motor.last_encoder_value =
@@ -120,8 +119,8 @@ void gimbal_set_control(gimbal_t *gimbal_set)
 {
 	if (gimbal_set == NULL)
 	{
-		return;
-	}
+		return;	}
+	//根据模式设定遥控对数值的影响
 	if (gimbal_set->mode == omnidirectional)
 	{
 		gimbal_set->gimbal_yaw_set -= gimbal_set->RC->rc.ch[2]
@@ -129,22 +128,33 @@ void gimbal_set_control(gimbal_t *gimbal_set)
 		gimbal_set->gimbal_pitch_set -= gimbal_set->RC->rc.ch[3]
 				* YAW_CHANNEL_TO_ANGLE;
 
+		shoot_speed_set(0);
 	}
 	else if (gimbal_set->mode == only_pitch)
 	{
-		gimbal_set->gimbal_pitch_set += gimbal_set->RC->rc.ch[3]
-				* YAW_CHANNEL_TO_ANGLE;
+
+		gimbal_set->gimbal_yaw_set -= gimbal_set->RC->rc.ch[2]
+				* 0.0005151f;
+		gimbal_set->gimbal_pitch_set -= gimbal_set->RC->rc.ch[3]
+				* 0.0005151f;
+
+		/***shoot*/
+		shoot_speed_set(30);
 	}
 	else if (gimbal_set->mode == Auto_Scan)
+
 	{
 		if (vision_rx[1 != 0])
 		{
-			gimbal_set->gimbal_yaw_set = gimbal_set->gimbal_yaw
-					- ((float) vision_rx[1] / 50.0f);
+//			gimbal_set->gimbal_yaw_set = gimbal_set->gimbal_yaw
+//					- ((float) vision_rx[1] / 50.0f);
 			gimbal_set->gimbal_pitch_set = gimbal_set->gimbal_pitch
 					- ((float) vision_rx[2] / 50.0f);
 		}
+		shoot_speed_set(0);
 	}
+
+	//设定角度限制
 	if (gimbal_set->gimbal_yaw_set > 90)
 	{
 		gimbal_set->gimbal_yaw_set = 90.0f;
@@ -166,7 +176,6 @@ void gimbal_set_control(gimbal_t *gimbal_set)
 void gimbal_pid_control(gimbal_t *gimbal_pid)
 {
 	static uint32_t tick, last_tick, val, last_val;
-	static uint32_t load = 168000;
 
 	val = SysTick->VAL;
 	tick = HAL_GetTick();
@@ -217,8 +226,7 @@ void gimbal_pid_control(gimbal_t *gimbal_pid)
 		//gimbal_pid->axis[i].motor.angular_velocity_set=0;
 
 	}
-	val_an = gimbal.axis[0].motor.encoder_value
-			- gimbal.axis[0].motor.last_encoder_value;
+
 }
 float motor_ecd_to_angle_change(motor_t *motor)
 {
@@ -249,7 +257,7 @@ void gimbal_task()
 	gimbal_data_update(&gimbal);
 	gimbal_set_control(&gimbal);
 	gimbal_pid_control(&gimbal);
-	set_motor_voltage_CAN2(gimbal.axis[pitch].set_current,
+	set_motor_voltage_CAN2(StdId_6020,gimbal.axis[pitch].set_current,
 			gimbal.axis[yaw].set_current, 0, 0);
 
 }
@@ -258,9 +266,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
 	if (huart = &huart6)
 	{
-		if ((Size == 8) && (vision_rx[0] == 1111) && (vision_rx[3] == 2222))
+		if ((vision_rx[0] == 1111) && (vision_rx[4] == 2222))
 		{
-			printf("X:%d,\tY:%d\r\n", vision_rx[1], vision_rx[2]);
+			printf("X:%d,\tY:%d\tDis:%d\r\n", vision_rx[1], vision_rx[2],vision_rx[3]);
 			x_p = vision_rx[1];
 		}
 

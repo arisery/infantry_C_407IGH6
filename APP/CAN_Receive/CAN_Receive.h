@@ -9,7 +9,8 @@
 #define CAN_RECEIVE_H_
 #include "main.h"
 
-#define FEEDBACK_ID_BASE_3508_     0x200
+#define FEEDBACK_ID_BASE_3508     0x200
+#define FEEDBACK_ID_BASE_2006     0x200
 #define FEEDBACK_ID_BASE_6020      0x204
 #define CAN_CONTROL_ID_BASE   0x1ff
 #define CAN_CONTROL_ID_EXTEND 0x2ff
@@ -30,6 +31,11 @@ typedef struct
 
 } motor_message_t;
 
+enum motor_StdId{
+	StdId_3508=0x200,
+	StdId_6020=0x1FF,
+	StdId_2006=0x1FF,
+};
 typedef struct
 {	motor_message_t* motor_feedback;
 	uint16_t encoder_value;
@@ -45,6 +51,8 @@ void can_filter_init();
 //返回底盘电机变量地址，通过指针方式获取原始数据,i的范围是0-3，对应0x201-0x204,
   motor_message_t *get_Chassis_Motor_Measure_Point(uint8_t i);
   motor_message_t* get_gimbal_Motor_Measure_Point(uint8_t i);
- void set_motor_voltage_CAN1( int16_t v1, int16_t v2, int16_t v3,int16_t v4);
- void set_motor_voltage_CAN2(int16_t v1, int16_t v2, int16_t v3, int16_t v4);
+  motor_message_t* get_shoot_Motor_Measure_Point();
+  void set_motor_voltage_CAN1(uint16_t StdId,int16_t v1, int16_t v2, int16_t v3, int16_t v4);
+ void set_motor_voltage_CAN2(uint16_t StdId,int16_t v1, int16_t v2, int16_t v3, int16_t v4);
+
 #endif /* CAN_RECEIVE_H_ */

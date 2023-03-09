@@ -10,11 +10,13 @@
 #include"function.h"
 #include"remote_control.h"
 #include "gimbal.h"
+#include "Shoot.h"
 extern CAN_HandleTypeDef hcan1, hcan2;
 static uint16_t can1_cnt = 0;
 static uint16_t can2_cnt = 0;
-static motor_message_t motor_chassis[4], motor_gimbal[2];
+static motor_message_t motor_chassis[4], motor_gimbal[2],motor_shoot[2];
 extern gimbal_t gimbal;
+extern shoot_t shoot;
 void Motor_Message(uint8_t index,motor_message_t* motor,uint8_t *data);
 void can_filter_init()
 {
@@ -51,13 +53,18 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &rx_header, rx_data);
 
-		if ((rx_header.StdId >= FEEDBACK_ID_BASE_6020)
-				&& (rx_header.StdId <= FEEDBACK_ID_BASE_6020 + MOTOR_MAX_NUM))
+		if ((rx_header.StdId >= FEEDBACK_ID_BASE_3508)
+				&& (rx_header.StdId <= FEEDBACK_ID_BASE_3508 + MOTOR_MAX_NUM))
 		{
 			can1_cnt++;
-			uint8_t index = rx_header.StdId - 0x205;
-			Motor_Message(index, motor_gimbal, rx_data);
+			uint8_t index = rx_header.StdId - 0x201;
+			Motor_Message(index, motor_chassis, rx_data);
 			//motor_ecd_to_angle_change(&gimbal.axis[index].motor);
+		}
+		else if(rx_header.StdId==0x205)
+		{
+			Motor_Message(0, motor_shoot, rx_data);
+			motor_ecd_to_angle_change(&shoot.motor);
 		}
 #ifdef DEBUG
 		if (can1_cnt == 300)
@@ -87,6 +94,13 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			Motor_Message(index, motor_gimbal, rx_data);
 			motor_ecd_to_angle_change(&gimbal.axis[index].motor);
 		}
+		else if((rx_header.StdId >= FEEDBACK_ID_BASE_2006)
+				&& (rx_header.StdId <= FEEDBACK_ID_BASE_6020))
+		{
+			uint8_t index = rx_header.StdId - 0x201;
+			Motor_Message(index, motor_shoot, rx_data);
+			//motor_ecd_to_angle_change(&gimbal.axis[index].motor);
+		}
 
 		if (can2_cnt == 300)
 		{
@@ -99,12 +113,12 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 }
 
 //发送电机电压*
-void set_motor_voltage_CAN1(int16_t v1, int16_t v2, int16_t v3, int16_t v4)
+void set_motor_voltage_CAN1(uint16_t StdId,int16_t v1, int16_t v2, int16_t v3, int16_t v4)
 {
 	static CAN_TxHeaderTypeDef tx_header;
 	uint8_t tx_data[8];
 
-	tx_header.StdId = 0x1FF;//0x200
+	tx_header.StdId = StdId;//0x200
 	tx_header.IDE = CAN_ID_STD;
 	tx_header.RTR = CAN_RTR_DATA;
 	tx_header.DLC = 8;
@@ -122,12 +136,12 @@ void set_motor_voltage_CAN1(int16_t v1, int16_t v2, int16_t v3, int16_t v4)
 
 }
 //发送电机电压
-void set_motor_voltage_CAN2(int16_t v1, int16_t v2, int16_t v3, int16_t v4)
+void set_motor_voltage_CAN2(uint16_t StdId,int16_t v1, int16_t v2, int16_t v3, int16_t v4)
 {
 	static CAN_TxHeaderTypeDef tx_header;
 	uint8_t tx_data[8];
 
-	tx_header.StdId = 0x1FF;
+	tx_header.StdId = StdId;
 	tx_header.IDE = CAN_ID_STD;
 	tx_header.RTR = CAN_RTR_DATA;
 	tx_header.DLC = 8;
@@ -153,7 +167,10 @@ void set_motor_voltage_CAN2(int16_t v1, int16_t v2, int16_t v3, int16_t v4)
 {
 	return &motor_gimbal[(i & 0x03)];
 }
-
+ motor_message_t* get_shoot_Motor_Measure_Point()
+{
+	return &motor_shoot[0];
+}
 void Motor_Message(uint8_t index,motor_message_t* motor,uint8_t *data)
 {
 	motor[index].last_encoder_value = motor[index].encoder_value;

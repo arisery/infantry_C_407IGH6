@@ -21,6 +21,8 @@
 
 //底盘的移动模式
 typedef enum{
+	follow_chassis,//地盘随意动作
+	no_rotary,//地盘不能选择，可以移动
 	independent,//独立移动，不与其他车辆联动
 	sync,//与其他车辆同步，发生相同的遥控信息
 	contrary,//与其他车辆互动，发生的相反的遥控信息

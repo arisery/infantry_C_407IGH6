@@ -133,6 +133,7 @@ int main(void)
   MX_TIM6_Init();
   MX_TIM3_Init();
   MX_TIM10_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   task_init();
 
