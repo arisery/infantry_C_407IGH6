@@ -8,7 +8,7 @@
 #ifndef APP_REMOTE_CONTROL_REMOTE_CONTROL_H_
 #define APP_REMOTE_CONTROL_REMOTE_CONTROL_H_
 #include "main.h"
-
+#include "stdint.h"
 #define uart_DBUS  huart3
 #define hdma_rx_DBUS	hdma_usart3_rx
 #define uart_user huart1

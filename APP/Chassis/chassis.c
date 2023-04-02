@@ -10,6 +10,8 @@
 #include"remote_control.h"
 #include"lib.h"
 #include "gimbal.h"
+#include "arm_math.h"
+#include "math.h"
 extern int16_t vision_rx[32];
 extern gimbal_t gimbal;
 float x_W = 0.01,dis_V=0.008;
@@ -25,19 +27,19 @@ uint32_t BIG_V, BIG_V_SET;
 void chassis_mode_set(chassis_struct_t *chassis_t)
 {
 
-	if (switch_is_down(chassis_t->RC->rc.s[0]))
+	if (switch_is_down(chassis_t->RC->rc.s[1]))
 	{
 		chassis_t->move_mode = no_rotary;
 
 	}
-	else if (switch_is_mid(chassis_t->RC->rc.s[0]))
+	else if (switch_is_mid(chassis_t->RC->rc.s[1]))
 	{
-		chassis_t->move_mode = follow_chassis;
+		chassis_t->move_mode = follow_gimbal;
 
 	}
-	else if (switch_is_up(chassis_t->RC->rc.s[0]))
+	else if (switch_is_up(chassis_t->RC->rc.s[1]))
 	{
-		chassis_t->move_mode = no_rotary;
+		chassis_t->move_mode = easy_chassis;
 
 	}
 	chassis_t->last_move_mode = chassis_t->move_mode;
@@ -97,22 +99,23 @@ void chassis_data_update(chassis_struct_t *chassis_update)
 
 void chassis_set_contorl(chassis_struct_t *chassis_control)
 {
-	float vx_set = 0.0f, vy_set = 0.0f, wz_set = 0.0f, angle_set = 0.0f,
-			wz_channel = 0.0f;
+	double vx_set = 0.0f, vy_set = 0.0f, wz_set = 0.0f, angle_set = 0.0f,
+			wz_channel = 0.0f,angle=0,Vx=0,Vy=0;
 	if (chassis_control == NULL)
 	{
 		return;
 
 	}
-	chassis_rc_to_control_vector(&vx_set, &vy_set, chassis_control);
+
 	rc_deadline_limit(chassis_control->RC->rc.ch[CHASSIS_WZ_CHANNEL],
 			wz_channel, 5);
 
 	if (chassis_control->move_mode == follow_chassis)
 	{
+		chassis_rc_to_control_vector(&vx_set, &vy_set, chassis_control);
 		wz_set = -CHASSIS_WZ_RC_SEN * wz_channel;
 		if(wz_set==0)
-		{	`
+		{
 		if (gimbal.mode == Auto_Scan)
 		{
 			wz_set = -vision_rx[1] *x_W ;
@@ -121,38 +124,52 @@ void chassis_set_contorl(chassis_struct_t *chassis_control)
 		}
 
 	}
-	else
+	else if(chassis_control->move_mode==no_rotary)
 	{
+		chassis_rc_to_control_vector(&vx_set, &vy_set, chassis_control);
 		wz_set = 0.0f;
 	}
 
-	if (chassis_control->move_mode == follow_chassis)
+	else if(chassis_control->move_mode==easy_chassis)
 	{
-		chassis_control->vx_set = float_constrain(vx_set,
-				chassis_control->vx_min_speed, chassis_control->vx_max_speed);
-		chassis_control->vy_set = float_constrain(vy_set,
-				chassis_control->vy_min_speed, chassis_control->vy_max_speed);
-		chassis_control->wz_set = float_constrain(wz_set,
-				chassis_control->wz_min_speed, chassis_control->wz_max_speed);
+		chassis_rc_to_control_vector(&Vx, &Vy, chassis_control);
+		angle=fmod(gimbal.gimbal_yaw,360.0)*2*PI/360.0;
+		wz_set = -CHASSIS_WZ_RC_SEN * wz_channel;
+		vx_set=Vx*cos(angle)-Vy*(sin(angle));
+		vy_set=Vx*sin(angle)+Vy*(cos(angle));
 	}
-	else if (chassis_control->move_mode == no_rotary)
+	else if(chassis_control->move_mode==follow_gimbal)
 	{
-		chassis_control->vx_set = float_constrain(vx_set,
-				chassis_control->vx_min_speed, chassis_control->vx_max_speed);
-		chassis_control->vy_set = float_constrain(vy_set,
-				chassis_control->vy_min_speed, chassis_control->vy_max_speed);
-		chassis_control->wz_set = float_constrain(wz_set,
-				chassis_control->wz_min_speed, chassis_control->wz_max_speed);
+		chassis_rc_to_control_vector(&vx_set, &vy_set, chassis_control);
+		if(gimbal.mode==Easy_Auto_Scan)
+		{
+
+		wz_set=1.7*fmod(gimbal.gimbal_yaw,360.0)*2*PI/360.0;
+
+		}
+		else if(gimbal.mode==omnidirectional)
+		{
+			wz_set=0;
+		}
 	}
 	else if (chassis_control->move_mode == contrary)
 	{
 		//发送反向信号
 	}
-
+	else
+	{
+		wz_set = 0.0f;
+	}
+		chassis_control->vx_set = float_constrain(vx_set,
+				chassis_control->vx_min_speed, chassis_control->vx_max_speed);
+		chassis_control->vy_set = float_constrain(vy_set,
+				chassis_control->vy_min_speed, chassis_control->vy_max_speed);
+		chassis_control->wz_set = float_constrain(wz_set,
+				chassis_control->wz_min_speed, chassis_control->wz_max_speed);
 }
 
 //遥控器的数据处理成底盘的前进vx速度，vy速度
-void chassis_rc_to_control_vector(float *vx_set, float *vy_set,
+void chassis_rc_to_control_vector(double *vx_set, double *vy_set,
 		chassis_struct_t *chassis_move_rc_to_vector)
 {
 	if (chassis_move_rc_to_vector == NULL || vx_set == NULL || vy_set == NULL)

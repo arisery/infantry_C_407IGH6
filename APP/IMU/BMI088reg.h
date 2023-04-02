@@ -1,12 +1,5 @@
-/*
- * BMI088_reg.h
- *
- *  Created on: Jan 28, 2023
- *      Author: Phoenix
- */
-
-#ifndef BMI088_REG_H_
-#define BMI088_REG_H_
+#ifndef BMI088REG_H
+#define BMI088REG_H
 
 #define BMI088_ACC_CHIP_ID 0x00 // the register is  " Who am I "
 #define BMI088_ACC_CHIP_ID_VALUE 0x1E
@@ -184,4 +177,4 @@
 #define BMI088_GYRO_TRIG_BIST_SHFITS 0x0
 #define BMI088_GYRO_TRIG_BIST (0x1 << BMI088_GYRO_TRIG_BIST_SHFITS)
 
-#endif /* BMI088_BMI088_REG_H_ */
+#endif

@@ -26,6 +26,7 @@ only_pitch,//云台只有pitch轴方向运动，只能上下摆动
 omnidirectional,//pitch和yaw轴都有，可以全向瞄准
 omnidirectional_shoot,//全向瞄准的同时可以发射
 Auto_Scan,//自瞄模式
+Easy_Auto_Scan,//自瞄加小陀螺
 }gimbal_mode_e;
 typedef enum {
     pitch=0,
@@ -50,9 +51,18 @@ typedef struct{
 	float gimbal_yaw,gimbal_yaw_set;
 	float gimbal_pitch,gimbal_pitch_set;
 	float gimbal_roll,gimbal_roll_set;
+	float INS_yaw,INS_yaw_set,INS_pitch,INS_pitch_set;
 	float pitch_max,pitch_min;
 	float yaw_max,yaw_min;
 }gimbal_t;
+#define Pitch_Limit(pitch) if ( pitch> 13)		\
+	{											\
+	pitch = 13.0f;								\
+	}											\
+	else if (pitch < -50)						\
+	{											\
+		pitch = -50.0f;							\
+	}											\
 float motor_ecd_to_angle_change(motor_t *motor );
 void gimbal_mode_set(gimbal_t* gimbal_mode);
 void gimbal_data_update(gimbal_t* gimbal_data);

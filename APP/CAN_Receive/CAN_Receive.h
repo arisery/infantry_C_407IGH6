@@ -42,7 +42,7 @@ typedef struct
 	uint16_t last_encoder_value;
 	uint16_t offset_ecd;
 	int16_t round;
-    float angle ,last_angle;
+    double angle ,last_angle;
     float angular_velocity;
     float last_angular_velocity;
     float angular_velocity_set;

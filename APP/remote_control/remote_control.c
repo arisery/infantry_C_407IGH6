@@ -124,8 +124,7 @@ void HAL_UART_IdleCpltCallback(UART_HandleTypeDef *huart)
 	rc_ctrl->mouse.press_l = sbus_buf[12];            //!< Mouse Left Is Press ?
 	rc_ctrl->mouse.press_r = sbus_buf[13];           //!< Mouse Right Is Press ?
 	rc_ctrl->keyboard.value = sbus_buf[14] | (sbus_buf[15] << 8);     //!< KeyBoard value
-	rc_ctrl->rc.ch[4] = sbus_buf[16] | (sbus_buf[17] << 8);               //NULL
-
+	rc_ctrl->rc.ch[4] = ((int16_t)sbus_buf[16]|((int16_t)sbus_buf[17]<<8))&0x07FF;
 	rc_ctrl->rc.ch[0] -= RC_CH_VALUE_OFFSET;
 	rc_ctrl->rc.ch[1] -= RC_CH_VALUE_OFFSET;
 	rc_ctrl->rc.ch[2] -= RC_CH_VALUE_OFFSET;

@@ -21,8 +21,11 @@
 
 //底盘的移动模式
 typedef enum{
-	follow_chassis,//地盘随意动作
-	no_rotary,//地盘不能选择，可以移动
+	follow_chassis,//底盘随意动作
+	easy_chassis,//小陀螺
+	follow_gimbal,//底盘跟随云台
+
+	no_rotary,//底盘不能选择，可以移动
 	independent,//独立移动，不与其他车辆联动
 	sync,//与其他车辆同步，发生相同的遥控信息
 	contrary,//与其他车辆互动，发生的相反的遥控信息
@@ -158,7 +161,7 @@ typedef struct {
 void chassis_mode_set(chassis_struct_t* chassis_t);
 void chassis_data_update(chassis_struct_t* chassis_update);
 void chassis_set_contorl(chassis_struct_t *chassis_control);
-void chassis_rc_to_control_vector(float *vx_set, float *vy_set,chassis_struct_t *chassis_move_rc_to_vector);
+void chassis_rc_to_control_vector(double *vx_set, double *vy_set,chassis_struct_t *chassis_move_rc_to_vector);
 void chassis_pid_control(chassis_struct_t* chassis_pid);
 void chassis_mecanum_wheel_speed(const float vx_set,const float vy_set, const float wz_set, float wheel_speed[4]);
 void chassis_task();

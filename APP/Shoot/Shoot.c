@@ -120,6 +120,7 @@ void shoot_set_control(shoot_t *shoot_set)
 	}
 	if (gimbal.mode == only_pitch)
 	{
+		shoot_speed_set(30);
 		if (shoot_set->mode == no_shoot)
 		{
 
@@ -133,6 +134,10 @@ void shoot_set_control(shoot_t *shoot_set)
 		{
 			shoot_set->angle_set += add_angle;
 		}
+	}
+	else {
+
+				shoot_speed_set(0);
 	}
 
 }

@@ -27,11 +27,10 @@
 /* USER CODE BEGIN Includes */
 #include "gimbal.h"
 #include"function.h"
-#include "IMU_C.h"
+#include "INS_task.h"
 #include "gimbal.h"
 #include "Shoot.h"
 #include <chassis.h>
-
 #include "stdio.h"
 /* USER CODE END Includes */
 
@@ -55,27 +54,38 @@
 extern chassis_struct_t chassis;
 extern gimbal_t gimbal;
 float PITCH,ROLL,YAW;
-extern TIM_HandleTypeDef htim6;
+extern TIM_HandleTypeDef htim6,htim8;
+extern RC_ctrl_t rc_ctrl;
 osThreadId ChassisHandle;
 osThreadId ShootHandle;
+int temp1,temp2;
+ char ptrTaskList[500];
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
+uint32_t defaultTaskBuffer[ 128 ];
+osStaticThreadDef_t defaultTaskControlBlock;
 osThreadId GimbalHandle;
-osThreadId myTask03Handle;
+uint32_t GimbalBuffer[ 1024 ];
+osStaticThreadDef_t GimbalControlBlock;
 osThreadId myTask04Handle;
+uint32_t myTask04Buffer[ 1024 ];
+osStaticThreadDef_t myTask04ControlBlock;
 osThreadId myTask05Handle;
+uint32_t myTask05Buffer[ 1024 ];
+osStaticThreadDef_t myTask05ControlBlock;
+osThreadId imuTaskHandle;
+uint32_t imuTaskBuffer[ 2048 ];
+osStaticThreadDef_t imuTaskControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-void Shoot_TASK(void const * argument);
-void Chassis_TASK(void const * argument);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
 void Gimbal_TASK(void const * argument);
-void GYRO(void const * argument);
 void Chassis_TASK(void const * argument);
 void Shoot_TASK(void const * argument);
+void INS_task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -84,6 +94,23 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
 
 /* GetTimerTaskMemory prototype (linked to static allocation support) */
 void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize );
+
+/* Hook prototypes */
+void configureTimerForRunTimeStats(void);
+unsigned long getRunTimeCounterValue(void);
+
+/* USER CODE BEGIN 1 */
+/* Functions needed when configGENERATE_RUN_TIME_STATS is on */
+__weak void configureTimerForRunTimeStats(void)
+{
+
+}
+
+__weak unsigned long getRunTimeCounterValue(void)
+{
+return 0;
+}
+/* USER CODE END 1 */
 
 /* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
 static StaticTask_t xIdleTaskTCBBuffer;
@@ -139,24 +166,24 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityBelowNormal, 0, 128, defaultTaskBuffer, &defaultTaskControlBlock);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of Gimbal */
-  osThreadDef(Gimbal, Gimbal_TASK, osPriorityNormal, 0, 512);
+  osThreadStaticDef(Gimbal, Gimbal_TASK, osPriorityNormal, 0, 1024, GimbalBuffer, &GimbalControlBlock);
   GimbalHandle = osThreadCreate(osThread(Gimbal), NULL);
 
-  /* definition and creation of myTask03 */
-  osThreadDef(myTask03, GYRO, osPriorityNormal, 0, 512);
-  myTask03Handle = osThreadCreate(osThread(myTask03), NULL);
-
   /* definition and creation of myTask04 */
-  osThreadDef(myTask04, Chassis_TASK, osPriorityNormal, 0, 1024);
+  osThreadStaticDef(myTask04, Chassis_TASK, osPriorityNormal, 0, 1024, myTask04Buffer, &myTask04ControlBlock);
   myTask04Handle = osThreadCreate(osThread(myTask04), NULL);
 
   /* definition and creation of myTask05 */
-  osThreadDef(myTask05, Shoot_TASK, osPriorityNormal, 0, 1024);
+  osThreadStaticDef(myTask05, Shoot_TASK, osPriorityNormal, 0, 1024, myTask05Buffer, &myTask05ControlBlock);
   myTask05Handle = osThreadCreate(osThread(myTask05), NULL);
+
+  /* definition and creation of imuTask */
+  osThreadStaticDef(imuTask, INS_task, osPriorityAboveNormal, 0, 2048, imuTaskBuffer, &imuTaskControlBlock);
+  imuTaskHandle = osThreadCreate(osThread(imuTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -178,7 +205,16 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-
+	  osDelay(10);
+	   vTaskList(ptrTaskList);
+	    printf("**********************************************\r\n");
+	    osDelay(10);
+	    printf("Task        State    Prio    Stack    Num\r\n");
+	   // printf("%s",ptrTaskList);
+	    osDelay(10);
+	    HAL_UART_Transmit_DMA(&huart1, ptrTaskList, 500);
+	    osDelay(10);
+	    printf("**********************************************\r\n");
     osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
@@ -194,55 +230,17 @@ void StartDefaultTask(void const * argument)
 void Gimbal_TASK(void const * argument)
 {
   /* USER CODE BEGIN Gimbal_TASK */
+	printf("Gimbal Task Start...\r\n");
+	osDelay(1000);
 	gimbal_init();
   /* Infinite loop */
   for(;;)
   {
-	 // Toggle_LED_R;
+	  Toggle_LED_R;
 	  gimbal_task();
     osDelay(5);
   }
   /* USER CODE END Gimbal_TASK */
-}
-
-/* USER CODE BEGIN Header_GYRO */
-/**
-* @brief Function implementing the myTask03 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_GYRO */
-void GYRO(void const * argument)
-{
-  /* USER CODE BEGIN GYRO */
-	int i=1;
-	uint16_t tick,temp;
-	uint32_t gyro_tick;
-IMU_Init();
-IMU_Start();
-HAL_TIM_Base_Start(&htim6);
-
-  /* Infinite loop */
-  for(;;)
-  {
-temp=TIM6->CNT-tick;
-	 // printf("%u\r\n",temp);
-	  gyro_tick=osKernelSysTick();
-	  tick=TIM6->CNT;
-	  if(i%100==0)
-	  {
-		  Toggle_LED_R;
-	  }
-
-	  IMU_Data_Fusion_Mahony(0.015f,&ROLL,&PITCH,&YAW);
-
-//gimbal.gimbal_yaw_set=-YAW;
-i++;
-	 // osDelayUntil(&gyro_tick,5);
-	  osDelay(5);
-
-  }
-  /* USER CODE END GYRO */
 }
 
 /* USER CODE BEGIN Header_Chassis_TASK */
@@ -255,6 +253,9 @@ i++;
 void Chassis_TASK(void const * argument)
 {
   /* USER CODE BEGIN Chassis_TASK */
+	osDelay(10);
+	printf("Chassis Task Start...\r\n");
+	osDelay(1000);
 	chassis_init(&chassis);
   /* Infinite loop */
   for(;;)
@@ -275,15 +276,35 @@ void Chassis_TASK(void const * argument)
 void Shoot_TASK(void const * argument)
 {
   /* USER CODE BEGIN Shoot_TASK */
+	osDelay(5);
+	printf("Shoot Task Start...\r\n");
 	shoot_init();
   /* Infinite loop */
   for(;;)
   {
-	  shoot_task();
+	 // shoot_task();
 		  osDelay(5);
 
   }
   /* USER CODE END Shoot_TASK */
+}
+
+/* USER CODE BEGIN Header_INS_task */
+/**
+* @brief Function implementing the imuTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_INS_task */
+__weak void INS_task(void const * argument)
+{
+  /* USER CODE BEGIN INS_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END INS_task */
 }
 
 /* Private application code --------------------------------------------------*/

@@ -30,52 +30,10 @@ void task_init()
 	//chassis_init(&chassis);
 	//gimbal_init();
 	//sync_init();
-	HAL_Delay(1000);
+	HAL_Delay(2000);
 	vision_RX_init();
 
 // HAL_TIM_Base_Start_IT(&htim3);
  //HAL_TIM_Base_Start(&htim6);
 }
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-	if (htim->Instance == TIM2) {
-	   // HAL_IncTick();
-	  }
-if(htim==&htim3)
-{
 
-	TIM6->CNT=0;
-	//__HAL_TIM_ENABLE(&htim6);
-
-	chassis_task();
-	 gimbal_task();
-#ifdef nrf_rx
-
-	NRF24L01_Flush_Rx_Fifo();
-NRF24L01_Clear_IRQ_Flag( IRQ_ALL);
-#else
-
-#endif
-
-#ifdef nrf_rx
-	static uint16_t i=0;
-	if (i==500)
-	{
-		Toggle_LED_G;
-		i=0;
-	}
-i++;
-
-
-#else
-	static uint16_t i=0;
-	if (i==500)
-	{
-		Toggle_LED_R;
-		i=0;
-	}
-i++;
-#endif
-}
-//tim6cnt=TIM6->CNT;
-}

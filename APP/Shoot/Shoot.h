@@ -33,6 +33,8 @@ typedef struct{
 
 void shoot_init();
 void shoot_task();
+void shoot_mode_set(shoot_t *mode);
+void shoot_data_update(shoot_t *update);
 void shoot_speed_set(uint8_t speed);
 void shoot_set_control(shoot_t *shoot_set);
 void shoot_pid_control(shoot_t * shoot_pid);
