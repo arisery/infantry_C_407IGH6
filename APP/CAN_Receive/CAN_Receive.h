@@ -42,16 +42,19 @@ typedef struct
 	uint16_t last_encoder_value;
 	uint16_t offset_ecd;
 	int16_t round;
+	int16_t set_current;
     double angle ,last_angle;
     float angular_velocity;
     float last_angular_velocity;
     float angular_velocity_set;
+    float speed,speed_set;
 }motor_t;
 void can_filter_init();
 //返回底盘电机变量地址，通过指针方式获取原始数据,i的范围是0-3，对应0x201-0x204,
   motor_message_t *get_Chassis_Motor_Measure_Point(uint8_t i);
   motor_message_t* get_gimbal_Motor_Measure_Point(uint8_t i);
   motor_message_t* get_shoot_Motor_Measure_Point();
+  motor_message_t* get_friction_Motor_Measure_Point(uint8_t i);
   void set_motor_voltage_CAN1(uint16_t StdId,int16_t v1, int16_t v2, int16_t v3, int16_t v4);
  void set_motor_voltage_CAN2(uint16_t StdId,int16_t v1, int16_t v2, int16_t v3, int16_t v4);
 

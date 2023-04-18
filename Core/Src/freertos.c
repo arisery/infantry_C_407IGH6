@@ -76,6 +76,7 @@ osStaticThreadDef_t myTask05ControlBlock;
 osThreadId imuTaskHandle;
 uint32_t imuTaskBuffer[ 2048 ];
 osStaticThreadDef_t imuTaskControlBlock;
+osThreadId Lost_DetectHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -86,6 +87,7 @@ void Gimbal_TASK(void const * argument);
 void Chassis_TASK(void const * argument);
 void Shoot_TASK(void const * argument);
 void INS_task(void const * argument);
+void Detect_Task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -185,6 +187,10 @@ void MX_FREERTOS_Init(void) {
   osThreadStaticDef(imuTask, INS_task, osPriorityAboveNormal, 0, 2048, imuTaskBuffer, &imuTaskControlBlock);
   imuTaskHandle = osThreadCreate(osThread(imuTask), NULL);
 
+  /* definition and creation of Lost_Detect */
+  osThreadDef(Lost_Detect, Detect_Task, osPriorityIdle, 0, 256);
+  Lost_DetectHandle = osThreadCreate(osThread(Lost_Detect), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 
@@ -233,10 +239,11 @@ void Gimbal_TASK(void const * argument)
 	printf("Gimbal Task Start...\r\n");
 	osDelay(1000);
 	gimbal_init();
+
   /* Infinite loop */
   for(;;)
   {
-	  Toggle_LED_R;
+	//  Toggle_LED_R;
 	  gimbal_task();
     osDelay(5);
   }
@@ -256,6 +263,7 @@ void Chassis_TASK(void const * argument)
 	osDelay(10);
 	printf("Chassis Task Start...\r\n");
 	osDelay(1000);
+
 	chassis_init(&chassis);
   /* Infinite loop */
   for(;;)
@@ -282,7 +290,7 @@ void Shoot_TASK(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	 // shoot_task();
+//	  shoot_task();
 		  osDelay(5);
 
   }
@@ -305,6 +313,24 @@ __weak void INS_task(void const * argument)
     osDelay(1);
   }
   /* USER CODE END INS_task */
+}
+
+/* USER CODE BEGIN Header_Detect_Task */
+/**
+* @brief Function implementing the Lost_Detect thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Detect_Task */
+__weak void Detect_Task(void const * argument)
+{
+  /* USER CODE BEGIN Detect_Task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Detect_Task */
 }
 
 /* Private application code --------------------------------------------------*/

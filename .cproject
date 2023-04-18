@@ -65,10 +65,11 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/CAN_Receive}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Gimbal}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Algorithms_Lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/BMI088}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/PID_primary}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Shoot}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IMU}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IST8310}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Lost_Detect}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.379090217" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -150,26 +151,25 @@
 									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include"/>
+									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
+									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/nrf24L01}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/chassis}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Gimbal}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/PID}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/private_function}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/remote_control}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/task_init}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/user_lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/nrf24L01}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Chassis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/CAN_Receive}&quot;"/>
-									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include"/>
-									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
-									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Gimbal}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Algorithms_Lib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/BMI088}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IMU_C}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IST8310}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/PID_primary}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Shoot}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/IMU}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/infantry_C_407IGH6/APP/Lost_Detect}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.93487991" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

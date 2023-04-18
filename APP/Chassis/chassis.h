@@ -48,7 +48,7 @@ typedef struct {
 	PID_t motor_speed_pid[4];             //底盘电机速度pid
 	first_order_filter_type_t chassis_cmd_slow_set_vx;
 	first_order_filter_type_t chassis_cmd_slow_set_vy;
-
+	first_order_filter_type_t chassis_cmd_slow_set_vw;
 	float vx;                         //底盘速度 前进方向 前为正，单位 m/s
 	float vy;                         //底盘速度 左右方向 左为正  单位 m/s
 	float wz;                         //底盘旋转角速度，逆时针为正 单位 rad/s
@@ -90,15 +90,15 @@ typedef struct {
 
 #define MOTOR_DISTANCE_TO_CENTER 0.2f
 //底盘电机最大速度
-#define MAX_WHEEL_SPEED 4.0f
-//底盘运动过程最大前进速度
-#define NORMAL_MAX_CHASSIS_SPEED_X 3.0f
+#define MAX_WHEEL_SPEED 35.0f
+//底盘运动过程最大前进速度.0
+#define NORMAL_MAX_CHASSIS_SPEED_X 10.0f
 //底盘运动过程最大平移速度
-#define NORMAL_MAX_CHASSIS_SPEED_Y 2.9f
+#define NORMAL_MAX_CHASSIS_SPEED_Y 10.0f
 //底盘运动过程最大旋转速度
-#define NORMAL_MAX_CHASSIS_SPEED_WZ 2.9f
+#define NORMAL_MAX_CHASSIS_SPEED_WZ 10.0f
 //底盘设置旋转速度，设置前后左右轮不同设定速度的比例分权 0为在几何中心，不需要补偿
-#define CHASSIS_WZ_SET_SCALE 0.1f
+#define CHASSIS_WZ_SET_SCALE 0.0f
 
 //前后的遥控器通道号码
 #define CHASSIS_X_CHANNEL 1
@@ -109,9 +109,9 @@ typedef struct {
 
 
 //底盘任务控制间隔 2ms
-#define CHASSIS_CONTROL_TIME_MS 2
+#define CHASSIS_CONTROL_TIME_MS 6
 //底盘任务控制间隔 0.002s
-#define CHASSIS_CONTROL_TIME 0.002
+#define CHASSIS_CONTROL_TIME 0.006
 //底盘任务控制频率，尚未使用这个宏
 #define CHASSIS_CONTROL_FREQUENCE 500.0f
 //最大输出电流
@@ -119,7 +119,7 @@ typedef struct {
 
 #define CHASSIS_ACCEL_X_NUM 0.1666666667f
 #define CHASSIS_ACCEL_Y_NUM 0.3333333333f
-
+#define CHASSIS_ACCEL_W_NUM 0.5333333333f
 
 //m3508转化成底盘速度(m/s)的比例，做两个宏 是因为可能换电机需要更换比例
 #define M3508_MOTOR_RPM_TO_VECTOR 0.000415809748903494517209f
@@ -134,11 +134,11 @@ typedef struct {
 #define CHASSIS_LEFT_KEY   KEY_PRESSED_OFFSET_A
 #define CHASSIS_RIGHT_KEY    KEY_PRESSED_OFFSET_D
 
-#define KEYBOARD_MAX_CHASSIS_SPEED_X      1.0f
-#define KEYBOARD_NORMAL_CHASSIS_SPEED_X   0.5f
+#define KEYBOARD_MAX_CHASSIS_SPEED_X      1.8f
+#define KEYBOARD_NORMAL_CHASSIS_SPEED_X   1.2f
 
-#define KEYBOARD_MAX_CHASSIS_SPEED_y      1.0f
-#define KEYBOARD_NORMAL_CHASSIS_SPEED_y    0.5f
+#define KEYBOARD_MAX_CHASSIS_SPEED_y      1.8f
+#define KEYBOARD_NORMAL_CHASSIS_SPEED_y    1.2f
 
 #define KEYBOARD_NORMAL_CHASSIS_SPEED_W		1.0f
 #define KEYBOARD_MAX_CHASSIS_SPEED_W		2.5f

@@ -12,36 +12,31 @@
 #include "tim.h"
 extern gimbal_t gimbal;
 float add_angle=50.0f;
+float shoot_set=400;
 shoot_t shoot;
-/*
- *
- * 摩擦轮的PWM为TIM1的CH1 PE9和CH2 PE11
- * 50Hz， 高电平1ms为静止，2ms为最大转速
- * APB2总线，最大频率为168MHz
- * 设置PSC=1679，ARR=1999；
- *
- *
- */
+float R_Fric=0.05;
+float speed_low=40,speed_normal=40,speed_high=60;
+float fricRPM2speed=0.005235987f;
 void shoot_init()
 {
-	float PID_Angle[3] =
-	{ 1, 0.2, 0 }, PID_Speed[3] =
-	{ 5, 0.5, 0 };
-	TIM1->PSC = 1679;
-	TIM1->ARR = 1999;
+	float Supply_PID_Angle[3] =
+	{ 1, 0.2, 0 }, Supply_PID_Speed[3] =
+	{ 20, 0.5, 0 };
+	 float Friction_PID[3]={4000,1.0f,15.0};
 	shoot_speed_set(0);
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-
-
 	shoot.RC = get_remote_control_point();
-	shoot.motor.motor_feedback = get_shoot_Motor_Measure_Point();
-	PID_clear(&shoot.pid_angle);
-	PID_clear(&shoot.pid_speed);
-	PID_Init(&shoot.pid_angle, PID_POSITION, PID_Angle, 1000, 30);
-	PID_Init(&shoot.pid_speed, PID_POSITION, PID_Speed, 10000, 200);
-	shoot.motor.offset_ecd = shoot.motor.motor_feedback->encoder_value;
-	shoot.motor.round=0;
+	shoot.Supply.SupplyMotor.motor_feedback = get_shoot_Motor_Measure_Point();
+	shoot.Friction.FrictionMotor[0].motor_feedback=  get_friction_Motor_Measure_Point(0);
+	shoot.Friction.FrictionMotor[1].motor_feedback=  get_friction_Motor_Measure_Point(1);
+	PID_clear(&shoot.Supply.pid_angle);
+	PID_clear(&shoot.Supply.pid_speed);
+	PID_Init(&shoot.Supply.pid_angle, PID_POSITION, Supply_PID_Angle, 1000, 30);
+	PID_Init(&shoot.Supply.pid_speed, PID_POSITION, Supply_PID_Speed, 16000, 4000);
+	shoot.Supply.SupplyMotor.offset_ecd = shoot.Supply.SupplyMotor.motor_feedback->encoder_value;
+	shoot.Supply.SupplyMotor.round=0;
+	PID_Init(&shoot.Friction.pid_left, PID_POSITION, Friction_PID, 16000, 2000);
+	PID_Init(&shoot.Friction.pid_right, PID_POSITION, Friction_PID, 16000, 2000);
+	shoot.level=LOW;
 	HAL_Delay(3000);
 }
 
@@ -52,14 +47,7 @@ void shoot_init()
  */
 void shoot_speed_set(uint8_t speed)
 {
-	if ((speed < 0) || (speed > 100))
-	{
-		TIM1->CCR1 = 99;
-		TIM1->CCR2 = 99;
-		return;
-	}
-	TIM1->CCR1 = (speed + 99);
-	TIM1->CCR2 = (speed + 99);
+
 }
 
 void shoot_task()
@@ -68,29 +56,27 @@ void shoot_task()
 	shoot_data_update(&shoot);
 	shoot_set_control(&shoot);
 	shoot_pid_control(&shoot);
-	set_motor_voltage_CAN1(StdId_6020, shoot.set_current, 0, 0, 0);
+	 set_motor_voltage_CAN1(StdId_6020,0, 0, 0, shoot.Supply.set_current);
 }
 
-void shoot_mode_set(shoot_t *mode)
+void shoot_mode_set(shoot_t *shoot)
 {
 
-	mode->last_mode = mode->mode;
-	if (switch_is_mid(mode->RC->rc.s[1]))
+	shoot->Supply.last_mode = shoot->Supply.mode;
+	/*********************************************/
+ if (switch_is_up(shoot->RC->rc.s[1]))
 	{
-		mode->mode = no_shoot;
+		shoot->Supply.mode = kill_them;
+
+	}
+ else
+	{
+		shoot->Supply.mode = no_shoot;
 
 	}
 
-	else if (switch_is_down(mode->RC->rc.s[1]))
-	{
-		mode->mode = one_shoot;
+ /***********************************************/
 
-	}
-	else if (switch_is_up(mode->RC->rc.s[1]))
-	{
-		mode->mode = kill_them;
-
-	}
 
 }
 
@@ -100,15 +86,18 @@ void shoot_data_update(shoot_t *update)
 	{
 		return;
 	}
-	update->motor.last_encoder_value = update->motor.encoder_value;
-	update->motor.encoder_value = update->motor.motor_feedback->encoder_value;
-	update->motor.last_angle = update->motor.angle;
-	update->motor.last_angular_velocity=update->motor.angular_velocity;
-	update->motor.angular_velocity = update->motor.motor_feedback->speed_rpm
+	update->Supply.SupplyMotor.last_encoder_value = update->Supply.SupplyMotor.encoder_value;
+	update->Supply.SupplyMotor.encoder_value = update->Supply.SupplyMotor.motor_feedback->encoder_value;
+	update->Supply.SupplyMotor.last_angle = update->Supply.SupplyMotor.angle;
+	update->Supply.SupplyMotor.last_angular_velocity=update->Supply.SupplyMotor.angular_velocity;
+	update->Supply.SupplyMotor.angular_velocity = update->Supply.SupplyMotor.motor_feedback->speed_rpm
 			* 2*PI/60.0f;
-	update->motor.angle =
-			update->motor.round
-					* 360.0f+(update->motor.encoder_value-update->motor.offset_ecd)*Motor_Ecd_to_Angle;
+	update->Supply.SupplyMotor.angle =
+			update->Supply.SupplyMotor.round
+					* 360.0f+(update->Supply.SupplyMotor.encoder_value-update->Supply.SupplyMotor.offset_ecd)*Motor_Ecd_to_Angle;
+
+shoot.Friction.FrictionMotor[0].speed=shoot.Friction.FrictionMotor[0].motor_feedback->speed_rpm*fricRPM2speed;
+shoot.Friction.FrictionMotor[1].speed=shoot.Friction.FrictionMotor[1].motor_feedback->speed_rpm*fricRPM2speed;
 
 }
 
@@ -118,33 +107,72 @@ void shoot_set_control(shoot_t *shoot_set)
 	{
 		return;
 	}
-	if (gimbal.mode == only_pitch)
-	{
+
 		shoot_speed_set(30);
-		if (shoot_set->mode == no_shoot)
+		if (shoot_set->Supply.mode == no_shoot)
 		{
 
 		}
-		else if ((shoot_set->mode == one_shoot)
-				&& (shoot_set->last_mode == no_shoot))
+		else if ((shoot_set->Supply.mode == one_shoot)
+				&& (shoot_set->Supply.last_mode == no_shoot))
 		{
-			shoot_set->angle_set += 1440.0f;
+			shoot_set->Supply.angle_set += 1440.0f;
 		}
-		else if (shoot_set->mode == kill_them)
+		else if (shoot_set->Supply.mode == kill_them)
 		{
-			shoot_set->angle_set += add_angle;
+			shoot_set->Supply.angle_set += add_angle;
 		}
-	}
-	else {
 
-				shoot_speed_set(0);
+
+	/***************************************/
+	switch (shoot.level)
+	{
+	case LOW :
+		shoot.Friction.SetSpeed=speed_low;
+
+		break;
+	case NORMAL :
+		shoot.Friction.SetSpeed=speed_normal;
+		break;
+	case HIGH :
+		shoot.Friction.SetSpeed=speed_high;
+		break;
 	}
 
 }
 void shoot_pid_control(shoot_t * shoot_pid)
 {
 
-	shoot_pid->motor.angular_velocity_set=PID_Calc(&shoot_pid->pid_angle, shoot_pid->motor.angle, shoot_pid->angle_set);
-	shoot_pid->set_current=PID_Calc(&shoot_pid->pid_speed,shoot_pid->motor.angular_velocity,shoot_pid->motor.angular_velocity_set);
+	//shoot_pid->Supply.SupplyMotor.angular_velocity_set=PID_Calc(&shoot_pid->Supply.pid_angle, shoot_pid->Supply.SupplyMotor.angle, shoot_pid->Supply.angle_set);
+	if (shoot_pid->Supply.mode == kill_them)
+	{
+		shoot_pid->Supply.SupplyMotor.angular_velocity_set=shoot_set;
+
+	}
+	else{
+		shoot_pid->Supply.SupplyMotor.angular_velocity_set=0;
+	}
+	/************************************/
+	//左键点击
+	if (shoot_pid->RC->mouse.press_l ==1 )
+		{
+		shoot_pid->Supply.SupplyMotor.angular_velocity_set=shoot_set;
+			}
+	if (shoot_pid->RC->mouse.press_r ==1 )
+			{
+			shoot_pid->Supply.SupplyMotor.angular_velocity_set=-100;
+				}
+	/*****************************************/
+	shoot_pid->Supply.set_current=PID_Calc(&shoot_pid->Supply.pid_speed,shoot_pid->Supply.SupplyMotor.angular_velocity,shoot_pid->Supply.SupplyMotor.angular_velocity_set);
+
+
+/*************************************************************************/
+	shoot_pid->Friction.FrictionMotor[0].set_current=PID_Calc(&shoot_pid->Friction.pid_left, shoot_pid->Friction.FrictionMotor[0].speed, -shoot_pid->Friction.SetSpeed);
+
+	shoot_pid->Friction.FrictionMotor[1].set_current=PID_Calc(&shoot_pid->Friction.pid_right, shoot_pid->Friction.FrictionMotor[1].speed, shoot_pid->Friction.SetSpeed);
+	///set_motor_voltage_CAN2(StdId_3508, , 0, 0);
+
+
+	//set_motor_voltage_CAN2(StdId_3508, shoot_pid->Friction.FrictionMotor[0].set_current, shoot_pid->Friction.FrictionMotor[1].set_current, 0, 0);
 }
 

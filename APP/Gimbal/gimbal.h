@@ -29,8 +29,8 @@ Auto_Scan,//自瞄模式
 Easy_Auto_Scan,//自瞄加小陀螺
 }gimbal_mode_e;
 typedef enum {
-    pitch=0,
-	yaw =1,
+    pitch=1,
+	yaw =0,
 
 }gimbal_axis_e;
 typedef struct {
@@ -54,16 +54,18 @@ typedef struct{
 	float INS_yaw,INS_yaw_set,INS_pitch,INS_pitch_set;
 	float pitch_max,pitch_min;
 	float yaw_max,yaw_min;
+	first_order_filter_type_t YAW_Filter,PITCH_Filter,slow_VX_set;
+	float test_yaw;
 }gimbal_t;
-#define Pitch_Limit(pitch) if ( pitch> 13)		\
+#define Pitch_Limit(pitch) if ( pitch> 10.0f)		\
 	{											\
-	pitch = 13.0f;								\
+	pitch = 10.0f;								\
 	}											\
-	else if (pitch < -50)						\
+	else if (pitch < -30)						\
 	{											\
-		pitch = -50.0f;							\
-	}											\
-float motor_ecd_to_angle_change(motor_t *motor );
+		pitch = -30.0f;							\
+	}
+float motor_ecd_to_angle_change(motor_t *motor);
 void gimbal_mode_set(gimbal_t* gimbal_mode);
 void gimbal_data_update(gimbal_t* gimbal_data);
 void gimbal_set_control(gimbal_t* gimbal_set);

@@ -12,19 +12,29 @@
 #include "stm32f4xx_hal.h"
 #include "CAN_Receive.h"
 #include "INS_task.h"
+#include "function.h"
+#include "stdlib.h"
 float time = 0, val_an;
 float temp, an, b;
 gimbal_t gimbal;
+float sense_x = 0.002, sense_y = 0.0015f, sense_z = 0.1;
 extern IMU_t IMU_angle;
 int16_t vision_rx[32], x_p;
+extern CAN_HandleTypeDef hcan2;
+extern shoot_t shoot;
 void gimbal_init()
 {
+	float yaw_filter[1] =
+	{ 0.06f }, pitch_filter[1] =
+	{ 0.09f };
+	;
 	float yaw_PID_Angle[3] =
-	{ 35, 0.07, 0 }, yaw_PID_Speed[3] =
-	{ 20, 2.5, 0 }, pitch_PID_Angle[3] =
-	{ 45, 0.07, 0 }, pitch_PID_Speed[3] =
-	{ 22, 2.5, 0 };
+	{ 85, 0, -10 }, yaw_PID_Speed[3] =
+	{ 65, 2.5, -12 }, pitch_PID_Angle[3] =
+	{ 80, 0, -10 }, pitch_PID_Speed[3] =
+	{ 60, 0.1, -25 };
 
+	gimbal.test_yaw = 0;
 	gimbal.RC = get_remote_control_point();
 	for (int i = 0; i < 2; i++)
 	{
@@ -35,34 +45,41 @@ void gimbal_init()
 		{
 
 			PID_Init(&gimbal.axis[i].pid_angle, PID_POSITION, pitch_PID_Angle,
-					7200, 300);
+					1000, 200);
 			PID_Init(&gimbal.axis[i].pid_speed, PID_POSITION, pitch_PID_Speed,
-					10000, 15000);
+					25000, 6000);
 
 		}
 		else if (i == yaw)
 		{
 			PID_Init(&gimbal.axis[i].pid_angle, PID_POSITION, yaw_PID_Angle,
-					7200, 300);
+					500, 10);
 			PID_Init(&gimbal.axis[i].pid_speed, PID_POSITION, yaw_PID_Speed,
-					10000, 15000);
+					25000, 1000);
 		}
-		gimbal.axis[i].motor.round = 0;
+
 	}
-//	while (gimbal.axis[yaw].motor.offset_ecd == NULL)
-//	{
-//		gimbal.axis[yaw].motor.offset_ecd =
-//				gimbal.axis[yaw].motor.motor_feedback->encoder_value;
-//	}
-	gimbal.axis[yaw].motor.offset_ecd = gimbal.axis[yaw].motor.motor_feedback->encoder_value;
+	gimbal.axis[pitch].motor.motor_feedback->encoder_value = 9999;
+	while ((gimbal.axis[pitch].motor.motor_feedback->encoder_value > 8192)
+			|| (gimbal.axis[pitch].motor.motor_feedback->encoder_value == 0))
+	{
+
+	}
+
+	gimbal.axis[yaw].motor.offset_ecd = 7036;
 	gimbal.axis[yaw].motor.angle =
 			gimbal.axis[yaw].motor.round
 					* 360.0f+
 					(gimbal.axis[yaw].motor.motor_feedback->encoder_value-gimbal.axis[yaw].motor.offset_ecd)*Motor_Ecd_to_Angle;
 
 	gimbal.gimbal_yaw_set = gimbal.axis[yaw].motor.angle;
-	gimbal.INS_yaw_set=gimbal.INS_yaw;
-	gimbal.axis[pitch].motor.offset_ecd = 3260;
+	gimbal.INS_yaw_set = gimbal.INS_yaw;
+	gimbal.axis[yaw].motor.round = 0;
+	gimbal.axis[pitch].motor.offset_ecd = 976;
+	gimbal.axis[pitch].motor.round = 0;
+
+	first_order_filter_init(&gimbal.YAW_Filter, 0.006, yaw_filter);
+	first_order_filter_init(&gimbal.PITCH_Filter, 0.006, pitch_filter);
 }
 /*设置云台的模式
  *
@@ -117,7 +134,7 @@ void gimbal_data_update(gimbal_t *gimbal_data)
 				* 360.0
 				+ (gimbal_data->axis[i].motor.encoder_value
 						- gimbal_data->axis[i].motor.offset_ecd)
-						* Motor_Ecd_to_Angle) / 1.2;
+						* Motor_Ecd_to_Angle); // yaw与pitch减速比都为1，减速比1.0f
 
 	}
 	//更新当前两个轴的弧度制角度值
@@ -135,6 +152,12 @@ void gimbal_set_control(gimbal_t *gimbal_set)
 		return;
 	}
 	//根据模式设定遥控对数值的影响
+	/***********************************************************/
+	if (gimbal_set->RC->keyboard.value & KEY_PRESSED_OFFSET_CTRL)
+	{
+		gimbal_set->mode = only_pitch;
+	}
+	/*********************************/
 	if (gimbal_set->mode == omnidirectional)
 	{
 		gimbal_set->gimbal_yaw_set -= gimbal_set->RC->rc.ch[2]
@@ -149,18 +172,61 @@ void gimbal_set_control(gimbal_t *gimbal_set)
 	else if (gimbal_set->mode == only_pitch)
 	{
 
-		gimbal_set->gimbal_yaw_set =gimbal_set->gimbal_yaw;
-			gimbal_set->gimbal_pitch_set -= gimbal_set->RC->rc.ch[3]* YAW_CHANNEL_TO_ANGLE;
-			Pitch_Limit(gimbal_set->gimbal_pitch_set);
+		gimbal_set->gimbal_yaw_set = gimbal_set->gimbal_yaw;
+		gimbal_set->gimbal_pitch_set -= gimbal_set->RC->rc.ch[3]
+				* YAW_CHANNEL_TO_ANGLE;
+		Pitch_Limit(gimbal_set->gimbal_pitch_set);
+		gimbal_set->INS_yaw_set -= gimbal_set->RC->rc.ch[2]
+				* YAW_CHANNEL_TO_ANGLE;
+		gimbal_set->gimbal_pitch_set += gimbal_set->RC->mouse.y * sense_y;
+		if (abs(gimbal_set->RC->mouse.x) < 3)
+				{
+					first_order_filter_cali(&gimbal_set->YAW_Filter,
+							gimbal_set->RC->rc.ch[2] * YAW_CHANNEL_TO_ANGLE);
+					gimbal_set->INS_yaw_set -= gimbal_set->YAW_Filter.out;
+					gimbal_set->test_yaw -= gimbal_set->RC->rc.ch[2]
+							* YAW_CHANNEL_TO_ANGLE;
+
+				}
+				else
+				{
+					first_order_filter_cali(&gimbal_set->YAW_Filter,
+							gimbal_set->RC->mouse.x * sense_x);
+					gimbal_set->INS_yaw_set -= gimbal_set->YAW_Filter.out;
+					gimbal_set->INS_yaw_set -= gimbal_set->RC->mouse.x * sense_x;
+					gimbal_set->test_yaw -= gimbal_set->RC->mouse.x * sense_x;
+
+				}
 
 	}
 	else if (gimbal_set->mode == Easy_Auto_Scan)
 	{
-		gimbal_set->gimbal_yaw_set =gimbal_set->gimbal_yaw;
-		gimbal_set->gimbal_pitch_set -= gimbal_set->RC->rc.ch[3]* YAW_CHANNEL_TO_ANGLE;
-		Pitch_Limit(gimbal_set->gimbal_pitch_set);
-		gimbal_set->INS_yaw_set -= gimbal_set->RC->rc.ch[2] * YAW_CHANNEL_TO_ANGLE;
 
+		gimbal_set->gimbal_yaw_set = gimbal_set->gimbal_yaw;
+		gimbal_set->gimbal_pitch_set -= gimbal_set->RC->rc.ch[3]
+				* YAW_CHANNEL_TO_ANGLE;
+		Pitch_Limit(gimbal_set->gimbal_pitch_set);
+		gimbal_set->gimbal_pitch_set += gimbal_set->RC->mouse.y * sense_y;
+
+		if (abs(gimbal_set->RC->mouse.x) < 3)
+		{
+			first_order_filter_cali(&gimbal_set->YAW_Filter,
+					gimbal_set->RC->rc.ch[2] * YAW_CHANNEL_TO_ANGLE);
+			gimbal_set->INS_yaw_set -= gimbal_set->YAW_Filter.out;
+			gimbal_set->test_yaw -= gimbal_set->RC->rc.ch[2]
+					* YAW_CHANNEL_TO_ANGLE;
+
+		}
+		else
+		{
+			first_order_filter_cali(&gimbal_set->YAW_Filter,
+					gimbal_set->RC->mouse.x * sense_x);
+			gimbal_set->INS_yaw_set -= gimbal_set->YAW_Filter.out;
+			gimbal_set->test_yaw -= gimbal_set->RC->mouse.x * sense_x;
+
+		}
+
+		//
 	}
 	else if (gimbal_set->mode == Auto_Scan)
 
@@ -218,14 +284,14 @@ void gimbal_pid_control(gimbal_t *gimbal_pid)
 			if (gimbal_pid->mode == Easy_Auto_Scan)
 			{
 				gimbal_pid->axis[yaw].motor.angular_velocity_set = PID_Calc(
-										&gimbal_pid->axis[yaw].pid_angle,
-										gimbal_pid->INS_yaw, gimbal_pid->INS_yaw_set);
-								gimbal_pid->axis[yaw].set_current = PID_Calc(
-										&gimbal_pid->axis[i].pid_speed,
-										gimbal_pid->axis[yaw].motor.angular_velocity,
-										gimbal_pid->axis[yaw].motor.angular_velocity_set);
-								gimbal_pid->axis[i].motor.last_angular_velocity =
-										gimbal_pid->axis[i].motor.angular_velocity;
+						&gimbal_pid->axis[yaw].pid_angle, gimbal_pid->INS_yaw,
+						gimbal_pid->INS_yaw_set);
+				gimbal_pid->axis[yaw].set_current = PID_Calc(
+						&gimbal_pid->axis[i].pid_speed,
+						gimbal_pid->axis[yaw].motor.angular_velocity,
+						gimbal_pid->axis[yaw].motor.angular_velocity_set);
+				gimbal_pid->axis[i].motor.last_angular_velocity =
+						gimbal_pid->axis[i].motor.angular_velocity;
 			}
 			else if (gimbal_pid->mode == omnidirectional)
 			{
@@ -239,17 +305,17 @@ void gimbal_pid_control(gimbal_t *gimbal_pid)
 				gimbal_pid->axis[i].motor.last_angular_velocity =
 						gimbal_pid->axis[i].motor.angular_velocity;
 			}
-			else if(gimbal_pid->mode == only_pitch)
+			else if (gimbal_pid->mode == only_pitch)
 			{
 				gimbal_pid->axis[yaw].motor.angular_velocity_set = PID_Calc(
-													&gimbal_pid->axis[yaw].pid_angle,
-													gimbal_pid->INS_yaw, gimbal_pid->INS_yaw_set);
-											gimbal_pid->axis[yaw].set_current = PID_Calc(
-													&gimbal_pid->axis[i].pid_speed,
-													gimbal_pid->axis[yaw].motor.angular_velocity,
-													gimbal_pid->axis[yaw].motor.angular_velocity_set);
-											gimbal_pid->axis[i].motor.last_angular_velocity =
-													gimbal_pid->axis[i].motor.angular_velocity;
+						&gimbal_pid->axis[yaw].pid_angle, gimbal_pid->INS_yaw,
+						gimbal_pid->INS_yaw_set);
+				gimbal_pid->axis[yaw].set_current = PID_Calc(
+						&gimbal_pid->axis[i].pid_speed,
+						gimbal_pid->axis[yaw].motor.angular_velocity,
+						gimbal_pid->axis[yaw].motor.angular_velocity_set);
+				gimbal_pid->axis[i].motor.last_angular_velocity =
+						gimbal_pid->axis[i].motor.angular_velocity;
 			}
 		}
 		else if (i == pitch)
@@ -286,6 +352,7 @@ float motor_ecd_to_angle_change(motor_t *motor)
 	else if (-temp > 4000)
 	{
 		motor->round++;
+
 	}
 
 	return 0;
@@ -298,10 +365,20 @@ void gimbal_task()
 	gimbal_data_update(&gimbal);
 	gimbal_set_control(&gimbal);
 	gimbal_pid_control(&gimbal);
-	set_motor_voltage_CAN2(StdId_6020, gimbal.axis[pitch].set_current,
-			gimbal.axis[yaw].set_current, 0, 0);
+
+if(gimbal.mode == omnidirectional)
+{
+	set_motor_voltage_CAN2(StdId_6020,
+				gimbal.axis[yaw].set_current,gimbal.axis[pitch].set_current, 0,0);
 
 }
+else {
+	set_motor_voltage_CAN2(StdId_6020,
+					gimbal.axis[yaw].set_current,gimbal.axis[pitch].set_current, shoot.Friction.FrictionMotor[0].set_current, shoot.Friction.FrictionMotor[1].set_current);
+
+}
+
+} //gimbal.axis[pitch].set_current
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {

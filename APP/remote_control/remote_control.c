@@ -79,7 +79,7 @@ void HAL_UART_IdleCpltCallback(UART_HandleTypeDef *huart)
 			if(IDLE_CNT==150)
 			{
 				IDLE_CNT=0;
-			Toggle_LED_R;
+			Toggle_LED_G;
 
 			}
 			IDLE_CNT++;

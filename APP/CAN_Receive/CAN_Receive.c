@@ -14,7 +14,7 @@
 extern CAN_HandleTypeDef hcan1, hcan2;
 static uint16_t can1_cnt = 0;
 static uint16_t can2_cnt = 0;
-static motor_message_t motor_chassis[4], motor_gimbal[2],motor_shoot[2];
+static motor_message_t motor_chassis[4], motor_gimbal[2],motor_friction[2],motor_supply;
 extern gimbal_t gimbal;
 extern shoot_t shoot;
 void Motor_Message(uint8_t index,motor_message_t* motor,uint8_t *data);
@@ -53,18 +53,18 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &rx_header, rx_data);
 
-		if ((rx_header.StdId >= FEEDBACK_ID_BASE_3508)
+		if ((rx_header.StdId > FEEDBACK_ID_BASE_3508)
 				&& (rx_header.StdId <= FEEDBACK_ID_BASE_3508 + MOTOR_MAX_NUM))
 		{
 			can1_cnt++;
 			uint8_t index = rx_header.StdId - 0x201;
 			Motor_Message(index, motor_chassis, rx_data);
-			//motor_ecd_to_angle_change(&gimbal.axis[index].motor);
+
 		}
-		else if(rx_header.StdId==0x205)
+		else if(rx_header.StdId==0x208)
 		{
-			Motor_Message(0, motor_shoot, rx_data);
-			motor_ecd_to_angle_change(&shoot.motor);
+			Motor_Message(0, &motor_supply, rx_data);
+			motor_ecd_to_angle_change(&shoot.Supply.SupplyMotor);
 		}
 #ifdef DEBUG
 		if (can1_cnt == 300)
@@ -87,19 +87,19 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO1, &rx_header, rx_data);
 
 		if ((rx_header.StdId >= FEEDBACK_ID_BASE_6020)
-				&& (rx_header.StdId <= FEEDBACK_ID_BASE_6020 + MOTOR_MAX_NUM))
+				&& (rx_header.StdId <= FEEDBACK_ID_BASE_6020 + 2))
 		{
 			can2_cnt++;
 			uint8_t index = rx_header.StdId - 0x205;
 			Motor_Message(index, motor_gimbal, rx_data);
 			motor_ecd_to_angle_change(&gimbal.axis[index].motor);
 		}
-		else if((rx_header.StdId >= FEEDBACK_ID_BASE_2006)
-				&& (rx_header.StdId <= FEEDBACK_ID_BASE_6020))
+		else  if((rx_header.StdId > 0x206)
+					&& (rx_header.StdId <= 0x208 ))
 		{
-			uint8_t index = rx_header.StdId - 0x201;
-			Motor_Message(index, motor_shoot, rx_data);
-			//motor_ecd_to_angle_change(&gimbal.axis[index].motor);
+			uint8_t index = rx_header.StdId - 0x207;
+			Motor_Message(index, motor_friction, rx_data);
+
 		}
 
 		if (can2_cnt == 300)
@@ -169,7 +169,17 @@ void set_motor_voltage_CAN2(uint16_t StdId,int16_t v1, int16_t v2, int16_t v3, i
 }
  motor_message_t* get_shoot_Motor_Measure_Point()
 {
-	return &motor_shoot[0];
+	return &motor_supply;
+
+}
+ motor_message_t* get_friction_Motor_Measure_Point(uint8_t i)
+{
+	 if(i>=2)
+	 {
+		 return ;
+	 }
+	return &motor_friction[i];
+
 }
 void Motor_Message(uint8_t index,motor_message_t* motor,uint8_t *data)
 {

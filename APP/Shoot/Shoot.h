@@ -18,16 +18,34 @@ enum shoot_mode{
 	one_shoot,//单发
 	kill_them,//连发
 };
+enum BulletLevel
+{
+	LOW,
+	NORMAL,
+	HIGH,
+};
 
+typedef struct {
+	enum shoot_mode mode,last_mode;
+	PID_t pid_angle,pid_speed;
+	motor_t SupplyMotor;
+	 int16_t set_current;
+		float angle_set;
+}Supply_t;
+typedef struct {
+	PID_t pid_left,pid_right;
+	motor_t FrictionMotor[2];
+	float  SetSpeed,speed;
+	 int16_t set_current;
 
-
+}Friction_t;
 typedef struct{
 	const RC_ctrl_t *RC;//遥控器信息
-	enum shoot_mode mode,last_mode;
-	float angle_set;
-	 int16_t set_current;
-	motor_t motor;
-	PID_t pid_angle,pid_speed;
+	enum BulletLevel level;
+	Friction_t Friction;
+	Supply_t Supply;
+
+
 }shoot_t;
 
 
