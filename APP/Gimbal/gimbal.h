@@ -72,5 +72,5 @@ void gimbal_set_control(gimbal_t* gimbal_set);
 void gimbal_pid_control(gimbal_t* gimbal_pid);
 void gimbal_task();
 void gimbal_init();
-void vision_RX_init();
+
 #endif /* GIMBAL_GIMBAL_H_ */

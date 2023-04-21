@@ -19,14 +19,14 @@ float supply_speed_set = 400;
 shoot_t shoot;
 uint8_t quit_flag = 0;
 float R_Fric = 0.05;
-float speed_low = 40, speed_normal = 40, speed_high = 60;
+float speed_low = 25, speed_normal = 40, speed_high = 60;
 float fricRPM2speed = 0.005235987f;
 void shoot_init()
 {
 
 	float ShootFilter[1] = { 0.02f };
 	float Supply_PID_Angle[3] = { 0.5, 0, -0.1 }, Supply_PID_Speed[3] = { 15, 0.002, -1 };
-	float Friction_PID[3] = { 4000, 1.0f, 15.0 };
+	float Friction_PID[3] = { 600, 2.0f, -15.0 };
 	shoot_speed_set(0);
 	shoot.RC = get_remote_control_point();
 	shoot.Supply.SupplyMotor.motor_feedback = get_shoot_Motor_Measure_Point();

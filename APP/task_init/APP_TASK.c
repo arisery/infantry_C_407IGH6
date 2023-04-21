@@ -16,7 +16,7 @@
 #include "sync.h"
 #include "gimbal.h"
 #include "Shoot.h"
-
+#include "vision.h"
 extern TIM_HandleTypeDef htim3,htim2;
 extern TIM_HandleTypeDef htim6;
 extern chassis_struct_t chassis;

@@ -19,7 +19,7 @@ float temp, an, b;
 gimbal_t gimbal;
 float sense_x = 0.002, sense_y = 0.0015f, sense_z = 0.1;
 extern IMU_t IMU_angle;
-int16_t vision_rx[32], x_p;
+extern int16_t vision_rx[32], x_p;
 extern CAN_HandleTypeDef hcan2;
 extern shoot_t shoot;
 void gimbal_init()
@@ -182,7 +182,13 @@ void gimbal_set_control(gimbal_t *gimbal_set)
 		gimbal_set->gimbal_pitch_set -= gimbal_set->RC->rc.ch[3] * YAW_CHANNEL_TO_ANGLE;
 		Pitch_Limit(gimbal_set->gimbal_pitch_set);
 		gimbal_set->gimbal_pitch_set += gimbal_set->RC->mouse.y * sense_y;
-
+if (vision_rx[1 ]!= 0)
+				{
+					gimbal_set->INS_yaw_set -=
+							- ((float) vision_rx[1] / 50.0f);
+//					gimbal_set->INS_pitch_set -=
+//							- ((float) vision_rx[2] / 50.0f);
+				}
 		if (abs(gimbal_set->RC->mouse.x) < 3)
 		{
 			first_order_filter_cali(&gimbal_set->YAW_Filter, gimbal_set->RC->rc.ch[2] * YAW_CHANNEL_TO_ANGLE);
@@ -331,22 +337,4 @@ void gimbal_task()
 
 } //gimbal.axis[pitch].set_current
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
-{
-	if (huart == &huart6)
-	{
-		if ((vision_rx[0] == 1111) && (vision_rx[4] == 2222))
-		{
 
-			x_p = vision_rx[1];
-		}
-		printf("X:%d,\tY:%d\tDis:%d\r\n", vision_rx[1], vision_rx[2], vision_rx[3]);
-		HAL_UARTEx_ReceiveToIdle_DMA(&huart6, (uint8_t*) &vision_rx, 32);
-	}
-}
-
-void vision_RX_init()
-{
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart6, (uint8_t*) &vision_rx, 32);
-
-}
