@@ -19,11 +19,12 @@ static int16_t RC_abs(int16_t value);
 
 extern UART_HandleTypeDef uart_DBUS;
 extern DMA_HandleTypeDef hdma_rx_DBUS;
+extern float sense_x;
 uint8_t SBUS_rx_buf[SBUS_RX_BUF_NUM] =
 { 0 };
 uint16_t this_time_rx_len = 0;
 RC_ctrl_t rc_ctrl;
-
+float test_x=0;
 
 void uart_dma_init()
 {
@@ -123,14 +124,18 @@ void HAL_UART_IdleCpltCallback(UART_HandleTypeDef *huart)
 	rc_ctrl->mouse.z = sbus_buf[10] | (sbus_buf[11] << 8);     //!< Mouse Z axis
 	rc_ctrl->mouse.press_l = sbus_buf[12];            //!< Mouse Left Is Press ?
 	rc_ctrl->mouse.press_r = sbus_buf[13];           //!< Mouse Right Is Press ?
-	rc_ctrl->keyboard.value = sbus_buf[14] | (sbus_buf[15] << 8);     //!< KeyBoard value
+	rc_ctrl->keyboard.value= sbus_buf[14] | (sbus_buf[15] << 8);     //!< KeyBoard value
 	rc_ctrl->rc.ch[4] = ((int16_t)sbus_buf[16]|((int16_t)sbus_buf[17]<<8))&0x07FF;
 	rc_ctrl->rc.ch[0] -= RC_CH_VALUE_OFFSET;
 	rc_ctrl->rc.ch[1] -= RC_CH_VALUE_OFFSET;
 	rc_ctrl->rc.ch[2] -= RC_CH_VALUE_OFFSET;
 	rc_ctrl->rc.ch[3] -= RC_CH_VALUE_OFFSET;
 	rc_ctrl->rc.ch[4] -= RC_CH_VALUE_OFFSET;
-
+	RC_data_is_error();
+	if(rc_ctrl->mouse.x>2000)
+	{
+		rc_ctrl->mouse.x=0;
+	}
 	if (rc_ctrl->rc.ch[0] > 300)
 		{
 		LED_R_ON;
@@ -140,6 +145,7 @@ void HAL_UART_IdleCpltCallback(UART_HandleTypeDef *huart)
 		//LED_R_OFF;
 		}
 	//printf("ch(0)=%d",rc_ctrl->rc.ch[0]);
+	test_x-=rc_ctrl->mouse.x *sense_x;
 }
 uint8_t RC_data_is_error(void)
 {
@@ -175,8 +181,8 @@ uint8_t RC_data_is_error(void)
 	rc_ctrl.rc.ch[2] = 0;
 	rc_ctrl.rc.ch[3] = 0;
 	rc_ctrl.rc.ch[4] = 0;
-	rc_ctrl.rc.s[0] = RC_SW_DOWN;
-	rc_ctrl.rc.s[1] = RC_SW_DOWN;
+	//rc_ctrl.rc.s[0] = RC_SW_DOWN;
+	//rc_ctrl.rc.s[1] = RC_SW_DOWN;
 	rc_ctrl.mouse.x = 0;
 	rc_ctrl.mouse.y = 0;
 	rc_ctrl.mouse.z = 0;

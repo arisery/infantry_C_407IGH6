@@ -12,11 +12,12 @@
 #include "remote_control.h"
 #include "CAN_Receive.h"
 #include "PID.h"
-
+#include "Lib.h"
 enum shoot_mode{
 	no_shoot,//静止射击
 	one_shoot,//单发
 	kill_them,//连发
+	quit,//退弹
 };
 enum BulletLevel
 {
@@ -29,6 +30,7 @@ typedef struct {
 	enum shoot_mode mode,last_mode;
 	PID_t pid_angle,pid_speed;
 	motor_t SupplyMotor;
+	first_order_filter_type_t filter;
 	 int16_t set_current;
 		float angle_set;
 }Supply_t;

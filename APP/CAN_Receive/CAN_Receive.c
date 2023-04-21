@@ -61,7 +61,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			Motor_Message(index, motor_chassis, rx_data);
 
 		}
-		else if(rx_header.StdId==0x208)
+		else if(rx_header.StdId==0x205)
 		{
 			Motor_Message(0, &motor_supply, rx_data);
 			motor_ecd_to_angle_change(&shoot.Supply.SupplyMotor);

@@ -13,10 +13,7 @@
 #define hdma_rx_DBUS	hdma_usart3_rx
 #define uart_user huart1
 
-
 #define SBUS_RX_BUF_NUM 36u
-
-
 
 #define RC_CH_VALUE_MIN ((uint16_t)364)
 #define RC_CH_VALUE_OFFSET ((uint16_t)1024)
@@ -47,29 +44,50 @@
 #define KEY_PRESSED_OFFSET_V ((uint16_t)1 << 14)
 #define KEY_PRESSED_OFFSET_B ((uint16_t)1 << 15)
 
-typedef  struct
+typedef struct
 {
-         struct
-        {
-                int16_t ch[5];
-                char s[2];
-        } rc;
-         struct
-        {
-                int16_t x;
-                int16_t y;
-                int16_t z;
-                uint8_t press_l;
-                uint8_t press_r;
-        } mouse;
-         struct
-        {
-                uint16_t value;
-        } keyboard;
+	struct
+	{
+		int16_t ch[5];
+		char s[2];
+	} rc;
+	struct
+	{
+		int16_t x;
+		int16_t y;
+		int16_t z;
+		uint8_t press_l;
+		uint8_t press_r;
+	} mouse;
+
+	union
+	{
+		uint16_t value;
+		struct
+		{
+			uint16_t W :1;
+			uint16_t S :1;
+			uint16_t A :1;
+			uint16_t D :1;
+			uint16_t SHIFT :1;
+			uint16_t CTRL :1;
+			uint16_t Q :1;
+			uint16_t E :1;
+			uint16_t R :1;
+			uint16_t F :1;
+			uint16_t G :1;
+			uint16_t Z :1;
+			uint16_t X :1;
+			uint16_t C :1;
+			uint16_t V :1;
+			uint16_t B :1;
+		} key;
+	} keyboard;
 
 } RC_ctrl_t;
 void uart_dma_init();
 void HAL_UART_IdleCpltCallback(UART_HandleTypeDef *huart);
-extern const RC_ctrl_t *get_remote_control_point(void);
+extern const RC_ctrl_t* get_remote_control_point(void);
 void SBUS_TO_RC(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl);
+uint8_t RC_data_is_error(void);
 #endif /* APP_REMOTE_CONTROL_REMOTE_CONTROL_H_ */

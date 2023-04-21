@@ -76,8 +76,8 @@ extern char ptrTaskList[500];
 #define LED_G_GPIO_Port GPIOH
 #define LED_B_Pin GPIO_PIN_10
 #define LED_B_GPIO_Port GPIOH
-#define KEY_Pin GPIO_PIN_0
-#define KEY_GPIO_Port GPIOA
+#define key_Pin GPIO_PIN_0
+#define key_GPIO_Port GPIOA
 #define CS1_ACCEL_Pin GPIO_PIN_4
 #define CS1_ACCEL_GPIO_Port GPIOA
 #define INT1_ACCEL_Pin GPIO_PIN_4

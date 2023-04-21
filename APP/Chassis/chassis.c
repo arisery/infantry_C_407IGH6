@@ -217,14 +217,13 @@ void chassis_rc_to_control_vector(double *vx_set, double *vy_set,
 	vx_set_channel = vx_channel * CHASSIS_VX_RC_SEN;
 	vy_set_channel = vy_channel * -CHASSIS_VY_RC_SEN;
 //键盘操作
-	if (chassis_move_rc_to_vector->RC->keyboard.value & CHASSIS_FRONT_KEY)
+	if (chassis_move_rc_to_vector->RC->keyboard.key.W)
 	{
 		vx_set_channel = KEYBOARD_NORMAL_CHASSIS_SPEED_X;
-		if (chassis_move_rc_to_vector->RC->keyboard.value
-				& KEY_PRESSED_OFFSET_SHIFT)
+		if (chassis_move_rc_to_vector->RC->keyboard.key.SHIFT)
 			vx_set_channel = KEYBOARD_MAX_CHASSIS_SPEED_X;
 	}
-	else if (chassis_move_rc_to_vector->RC->keyboard.value & CHASSIS_BACK_KEY)
+	else if (chassis_move_rc_to_vector->RC->keyboard.key.S)
 	{
 		vx_set_channel = -KEYBOARD_NORMAL_CHASSIS_SPEED_X;
 		if (chassis_move_rc_to_vector->RC->keyboard.value
@@ -232,19 +231,18 @@ void chassis_rc_to_control_vector(double *vx_set, double *vy_set,
 			vx_set_channel = -KEYBOARD_MAX_CHASSIS_SPEED_X;
 	}
 
-	if (chassis_move_rc_to_vector->RC->keyboard.value & CHASSIS_LEFT_KEY)
+	if (chassis_move_rc_to_vector->RC->keyboard.key.A)
 	{
 		vy_set_channel = KEYBOARD_NORMAL_CHASSIS_SPEED_y;
-		if (chassis_move_rc_to_vector->RC->keyboard.value
-				& KEY_PRESSED_OFFSET_SHIFT)
+		if (chassis_move_rc_to_vector->RC->keyboard.key.SHIFT)
 			vy_set_channel = KEYBOARD_MAX_CHASSIS_SPEED_y;
 
 	}
-	else if (chassis_move_rc_to_vector->RC->keyboard.value & CHASSIS_RIGHT_KEY)
+	else if (chassis_move_rc_to_vector->RC->keyboard.key.D)
 	{
 		vy_set_channel = -KEYBOARD_NORMAL_CHASSIS_SPEED_y;
-		if (chassis_move_rc_to_vector->RC->keyboard.value
-				& KEY_PRESSED_OFFSET_SHIFT)
+		if (chassis_move_rc_to_vector->RC->keyboard.key.SHIFT)
+
 			vy_set_channel = -KEYBOARD_MAX_CHASSIS_SPEED_y;
 
 	}

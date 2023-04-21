@@ -27,7 +27,7 @@ typedef struct
     int16_t given_current;
     uint8_t temperate;
 	uint16_t last_encoder_value;
-
+	void *p;
 
 } motor_message_t;
 

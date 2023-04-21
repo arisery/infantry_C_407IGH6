@@ -32,6 +32,7 @@
 #include "Shoot.h"
 #include <chassis.h>
 #include "stdio.h"
+#include "key.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -77,6 +78,7 @@ osThreadId imuTaskHandle;
 uint32_t imuTaskBuffer[ 2048 ];
 osStaticThreadDef_t imuTaskControlBlock;
 osThreadId Lost_DetectHandle;
+osThreadId KEYHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -88,6 +90,7 @@ void Chassis_TASK(void const * argument);
 void Shoot_TASK(void const * argument);
 void INS_task(void const * argument);
 void Detect_Task(void const * argument);
+extern void Key_Task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -191,6 +194,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(Lost_Detect, Detect_Task, osPriorityIdle, 0, 256);
   Lost_DetectHandle = osThreadCreate(osThread(Lost_Detect), NULL);
 
+  /* definition and creation of KEY */
+  osThreadDef(KEY, Key_Task, osPriorityAboveNormal, 0, 512);
+  KEYHandle = osThreadCreate(osThread(KEY), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 
@@ -290,7 +297,7 @@ void Shoot_TASK(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-//	  shoot_task();
+	  shoot_task();
 		  osDelay(5);
 
   }
