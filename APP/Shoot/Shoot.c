@@ -13,11 +13,11 @@
 #include "string.h"
 #include "key.h"
 extern gimbal_t gimbal;
-extern KEY_T mouse_L, mouse_R;
+extern KEY_T mouse_L, mouse_R,Key_Q;
 float add_angle = 50.0f;
-float supply_speed_set = 400;
+float supply_speed_set = -200;
 shoot_t shoot;
-uint8_t quit_flag = 0;
+uint8_t quit_flag = 0,fric_speed_switch=0;
 float R_Fric = 0.05;
 float speed_low = 25, speed_normal = 40, speed_high = 60;
 float fricRPM2speed = 0.005235987f;
@@ -25,7 +25,7 @@ void shoot_init()
 {
 
 	float ShootFilter[1] = { 0.02f };
-	float Supply_PID_Angle[3] = { 0.5, 0, -0.1 }, Supply_PID_Speed[3] = { 15, 0.002, -1 };
+	float Supply_PID_Angle[3] = { 1, 0, -0.1 }, Supply_PID_Speed[3] = { 50, 0.05, -1 };
 	float Friction_PID[3] = { 600, 2.0f, -15.0 };
 	shoot_speed_set(0);
 	shoot.RC = get_remote_control_point();
@@ -118,6 +118,26 @@ void shoot_data_update(shoot_t *update)
 
 	shoot.Friction.FrictionMotor[1].speed = shoot.Friction.FrictionMotor[1].motor_feedback->speed_rpm * fricRPM2speed;
 
+	if(Key_Q.state==key_LongPressed)
+	{
+		fric_speed_switch=1;
+
+	}
+	if(fric_speed_switch==1)
+	{
+		if(Key_Q.state==key_release)
+		{
+			if(speed_low==25)
+			{
+				speed_low=0;
+			}
+			else if(speed_low==0)
+			{
+				speed_low=25;
+			}
+			fric_speed_switch=0;
+		}
+	}
 }
 
 void shoot_set_control(shoot_t *shoot_set)
@@ -130,7 +150,7 @@ void shoot_set_control(shoot_t *shoot_set)
 	shoot_speed_set(30);
 
 	/***************************************/
-	if (gimbal.mode == only_pitch)
+	if (gimbal.mode != omnidirectional)
 	{
 		switch (shoot.level)
 		{
@@ -169,11 +189,11 @@ void shoot_set_control(shoot_t *shoot_set)
 	}
 	if (shoot_set->RC->mouse.press_r == 1)
 	{
-		shoot_set->Supply.SupplyMotor.angular_velocity_set = -100;
+		shoot_set->Supply.SupplyMotor.angular_velocity_set = -10000;
 	}
 	if (quit_flag == 0)
 	{
-		shoot_set->Supply.angle_set = shoot_set->Supply.SupplyMotor.angle - 1720;
+		shoot_set->Supply.angle_set = shoot_set->Supply.SupplyMotor.angle + 960;
 	}
 	//退弹标志位
 	if ((shoot_set->Supply.last_mode != quit) && (shoot_set->Supply.mode == quit))
@@ -191,10 +211,10 @@ void shoot_pid_control(shoot_t *shoot_pid)
 		shoot_pid->Supply.set_current = PID_Calc(&shoot_pid->Supply.pid_speed,
 				shoot_pid->Supply.SupplyMotor.angular_velocity, shoot_pid->Supply.SupplyMotor.angular_velocity_set);
 		//在非退弹的情况下电流值是不用小于0的
-		if (shoot_pid->Supply.set_current < 0)
-		{
-			shoot_pid->Supply.set_current = 0;
-		}
+//		if (shoot_pid->Supply.set_current < 0)
+//		{
+//			shoot_pid->Supply.set_current = 0;
+//		}
 	}
 	else
 	{
@@ -209,10 +229,10 @@ void shoot_pid_control(shoot_t *shoot_pid)
 	/*************************************************************************/
 	//摩擦轮PID计算
 	shoot_pid->Friction.FrictionMotor[0].set_current = PID_Calc(&shoot_pid->Friction.pid_left,
-			shoot_pid->Friction.FrictionMotor[0].speed, -shoot_pid->Friction.SetSpeed);
+			shoot_pid->Friction.FrictionMotor[0].speed, shoot_pid->Friction.SetSpeed);
 
 	shoot_pid->Friction.FrictionMotor[1].set_current = PID_Calc(&shoot_pid->Friction.pid_right,
-			shoot_pid->Friction.FrictionMotor[1].speed, shoot_pid->Friction.SetSpeed);
+			shoot_pid->Friction.FrictionMotor[1].speed, -shoot_pid->Friction.SetSpeed);
 	//发送拨弹轮电流值
 	set_motor_voltage_CAN1(StdId_2006, shoot_pid->Supply.set_current, 0, 0, 0); //
 }

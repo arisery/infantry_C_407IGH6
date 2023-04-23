@@ -8,7 +8,7 @@
 #include "key.h"
 #include "remote_control.h"
 #include "cmsis_os.h"
-KEY_T btn[1],mouse_L,mouse_R;
+KEY_T btn[1],mouse_L,mouse_R,Key_shift,Key_Q;
 extern RC_ctrl_t rc_ctrl;
 key_state key_detect(KEY_T *key,int8_t val)
 {
@@ -21,7 +21,7 @@ key_state key_detect(KEY_T *key,int8_t val)
 	case flag:
 		state =val;
 	}
-
+	key->last_state=key->state;
 	if (state == key->TrueVal)//按键按下
 	{
 		if (key->temp == 0)//如果上一次没有按下
@@ -63,6 +63,7 @@ key_state key_detect(KEY_T *key,int8_t val)
 			key->state = key_release;
 		}
 		key->temp =0;
+
 	}
 return key->state;
 }
@@ -85,6 +86,12 @@ void key_init()
 	mouse_R.TrueVal=1;
 	mouse_R.LongPressCounter=30;
 
+	Key_shift.type=flag;
+	Key_shift.TrueVal=1;
+	Key_shift.LongPressCounter=30;
+	Key_Q.type=flag;
+	Key_Q.TrueVal=1;
+	Key_Q.LongPressCounter=30;
 }
 
 void Key_Task(void const * argument)
@@ -95,7 +102,9 @@ void Key_Task(void const * argument)
 		key_detect(btn, HAL_GPIO_ReadPin(btn[0].GPIO.GPIOX , btn[0].GPIO.GPIO_PIN));
 		key_detect(&mouse_L, rc_ctrl.mouse.press_l);
 		key_detect(&mouse_R, rc_ctrl.mouse.press_r);
-		osDelay(6);
+		key_detect(&Key_shift, rc_ctrl.keyboard.key.SHIFT);
+		key_detect(&Key_Q, rc_ctrl.keyboard.key.Q);
+		osDelay(5);
 	}
 }
 

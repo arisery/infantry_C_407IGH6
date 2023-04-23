@@ -13,7 +13,7 @@ typedef struct
 {
 		uint8_t header;
 		uint8_t ID;
-		uint16_t array[4];
+		int16_t array[4];
 		uint8_t tail;
 }vision_t;
 void vision_RX_init();

@@ -57,9 +57,9 @@ typedef struct{
 	first_order_filter_type_t YAW_Filter,PITCH_Filter,slow_VX_set;
 	float test_yaw;
 }gimbal_t;
-#define Pitch_Limit(pitch) if ( pitch> 10.0f)		\
+#define Pitch_Limit(pitch) if ( pitch> 17.0f)		\
 	{											\
-	pitch = 10.0f;								\
+	pitch = 17.0f;								\
 	}											\
 	else if (pitch < -30)						\
 	{											\

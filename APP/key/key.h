@@ -39,7 +39,7 @@ typedef struct
 	int8_t val;
 
 	KeyType type;
-	key_state state;
+	key_state state,last_state;
 	uint8_t LongPressCounter;
 	uint32_t counter;
 	uint8_t temp;
