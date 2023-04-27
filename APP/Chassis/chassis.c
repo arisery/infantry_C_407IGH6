@@ -165,7 +165,7 @@ void chassis_set_contorl(chassis_struct_t *chassis_control)
 			first_order_filter_cali(&chassis_control->chassis_follow_gimbal_vw,Vw);
 			wz_set= chassis_control->chassis_follow_gimbal_vw.out;
 		}
-
+		first_order_filter_cali(&chassis_control->chassis_cmd_slow_set_vw, 0);
 	}
 	if (chassis_control->move_mode == easy_chassis)
 	{
