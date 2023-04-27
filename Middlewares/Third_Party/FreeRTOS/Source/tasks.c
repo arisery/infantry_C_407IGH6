@@ -3636,7 +3636,7 @@ UBaseType_t uxPriority;
 }
 /*-----------------------------------------------------------*/
 
-static void prvCheckTasksWaitingTermination( void )
+static    void prvCheckTasksWaitingTermination( void )
 {
 
 	/** THIS FUNCTION IS CALLED FROM THE RTOS IDLE TASK **/

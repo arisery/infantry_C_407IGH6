@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "can.h"
+#include "crc.h"
 #include "dma.h"
 #include "i2c.h"
 #include "spi.h"
@@ -136,6 +137,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM10_Init();
   MX_TIM8_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
     HAL_UART_Transmit(&huart1, "hello", 5, 0xff);
   printf("System Start...\r\n");

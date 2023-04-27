@@ -49,6 +49,7 @@ typedef struct {
 	first_order_filter_type_t chassis_cmd_slow_set_vx;
 	first_order_filter_type_t chassis_cmd_slow_set_vy;
 	first_order_filter_type_t chassis_cmd_slow_set_vw;
+	first_order_filter_type_t chassis_follow_gimbal_vw;
 	float vx;                         //底盘速度 前进方向 前为正，单位 m/s
 	float vy;                         //底盘速度 左右方向 左为正  单位 m/s
 	float wz;                         //底盘旋转角速度，逆时针为正 单位 rad/s
@@ -92,11 +93,11 @@ typedef struct {
 //底盘电机最大速度
 #define MAX_WHEEL_SPEED 35.0f
 //底盘运动过程最大前进速度.0
-#define NORMAL_MAX_CHASSIS_SPEED_X 10.0f
+#define NORMAL_MAX_CHASSIS_SPEED_X 2.0f
 //底盘运动过程最大平移速度
-#define NORMAL_MAX_CHASSIS_SPEED_Y 10.0f
+#define NORMAL_MAX_CHASSIS_SPEED_Y 2.0f
 //底盘运动过程最大旋转速度
-#define NORMAL_MAX_CHASSIS_SPEED_WZ 10.0f
+#define NORMAL_MAX_CHASSIS_SPEED_WZ 8.0f
 //底盘设置旋转速度，设置前后左右轮不同设定速度的比例分权 0为在几何中心，不需要补偿
 #define CHASSIS_WZ_SET_SCALE 0.0f
 
@@ -115,7 +116,7 @@ typedef struct {
 //底盘任务控制频率，尚未使用这个宏
 #define CHASSIS_CONTROL_FREQUENCE 500.0f
 //最大输出电流
-#define MAX_MOTOR_CAN_CURRENT 16000.0f
+#define MAX_MOTOR_CAN_CURRENT 10000.0f
 
 #define CHASSIS_ACCEL_X_NUM 0.1666666667f
 #define CHASSIS_ACCEL_Y_NUM 0.3333333333f

@@ -12,9 +12,10 @@
 #include "gimbal.h"
 #include "arm_math.h"
 #include "math.h"
-extern int16_t vision_rx[32];
+
+
 extern gimbal_t gimbal;
-float x_W = 0.01, dis_V = 0.008;
+float x_W = 0.01, dis_V = 0.008,Max_follow_gimbal_w=4.0f;
 chassis_struct_t chassis;
 uint32_t BIG_V, BIG_V_SET;
 char EasyChassis_Flag = 0;
@@ -94,7 +95,7 @@ void chassis_data_update(chassis_struct_t *chassis_update)
 
 void chassis_set_contorl(chassis_struct_t *chassis_control)
 {
-	double vx_set = 0.0f, vy_set = 0.0f, wz_set = 0.0f, angle_set = 0.0f, wz_channel = 0.0f, angle = 0, Vx = 0, Vy = 0;
+	double vx_set = 0.0f, vy_set = 0.0f, wz_set = 0.0f, angle_set = 0.0f, wz_channel = 0.0f, angle = 0, Vx = 0, Vy = 0,Vw=0.0f;
 	if (chassis_control == NULL)
 	{
 		return;
@@ -117,8 +118,8 @@ void chassis_set_contorl(chassis_struct_t *chassis_control)
 		{
 			if (gimbal.mode == Auto_Scan)
 			{
-				wz_set = -vision_rx[1] * x_W;
-				vx_set = vision_rx[3] * dis_V;
+//				wz_set = -vision_rx[1] * x_W;
+//				vx_set = vision_rx[3] * dis_V;
 			}
 		}
 
@@ -135,9 +136,10 @@ void chassis_set_contorl(chassis_struct_t *chassis_control)
 		vx_set = Vx * cos(angle) - Vy * (sin(angle));
 		vy_set = Vx * sin(angle) + Vy * (cos(angle));
 
-		if (fabs(Vx) < 0.2f)
+		if ((fabs(Vx) < 0.05f)||(fabs(Vy)<0.05f))
 		{
 			wz_set = 0;
+			first_order_filter_cali(&chassis_control->chassis_follow_gimbal_vw,0);
 		}
 		else
 		{
@@ -150,8 +152,18 @@ void chassis_set_contorl(chassis_struct_t *chassis_control)
 			{
 				angle += 360.0;
 			}
-			first_order_filter_cali(&chassis_control->chassis_cmd_slow_set_vw, 2.0 * angle * 2 * PI / 360.0);
-			wz_set = chassis_control->chassis_cmd_slow_set_vw.out;
+			Vw=4.0 * angle * 2 * PI / 360.0;
+			if(Vw>4)
+			{
+				Vw=Max_follow_gimbal_w;
+			}
+			else if(Vw<-4)
+			{
+				Vw=-Max_follow_gimbal_w;
+			}
+			else
+			first_order_filter_cali(&chassis_control->chassis_follow_gimbal_vw,Vw);
+			wz_set= chassis_control->chassis_follow_gimbal_vw.out;
 		}
 
 	}
@@ -170,13 +182,7 @@ void chassis_set_contorl(chassis_struct_t *chassis_control)
 		//发送反向信号
 	}
 
-//if(EasyChassis_Flag==1)
-//{
-//	angle=fmod(gimbal.gimbal_yaw,360.0)*2*PI/360.0;
-//			wz_set = -6;
-//			vx_set=Vx*cos(angle)-Vy*(sin(angle));
-//			vy_set=Vx*sin(angle)+Vy*(cos(angle));
-//}
+
 	chassis_control->vx_set = float_constrain(vx_set, chassis_control->vx_min_speed, chassis_control->vx_max_speed);
 	chassis_control->vy_set = float_constrain(vy_set, chassis_control->vy_min_speed, chassis_control->vy_max_speed);
 	chassis_control->wz_set = float_constrain(wz_set, chassis_control->wz_min_speed, chassis_control->wz_max_speed);
@@ -281,6 +287,7 @@ void chassis_pid_control(chassis_struct_t *chassis_pid)
 	{
 		chassis_pid->wheel[i].set_current = PID_Calc(&chassis_pid->motor_speed_pid[i], chassis_pid->wheel[i].speed,
 				chassis_pid->wheel[i].speed_set);
+
 	}
 
 }
@@ -326,6 +333,7 @@ void chassis_init(chassis_struct_t *chassis_init_t)
 	const static float chassis_x_order_filter[1] = { CHASSIS_ACCEL_X_NUM };
 	const static float chassis_y_order_filter[1] = { CHASSIS_ACCEL_Y_NUM };
 	const static float chassis_w_order_filter[1] = { CHASSIS_ACCEL_W_NUM };
+	const static float chassis_follow_gimbal_w_filter[1] = { 0.3333f };
 	chassis_init_t->RC = get_remote_control_point();
 
 	/*
@@ -350,6 +358,8 @@ void chassis_init(chassis_struct_t *chassis_init_t)
 	CHASSIS_CONTROL_TIME, chassis_y_order_filter);
 	first_order_filter_init(&chassis_init_t->chassis_cmd_slow_set_vw,
 	CHASSIS_CONTROL_TIME, chassis_w_order_filter);
+	first_order_filter_init(&chassis_init_t->chassis_follow_gimbal_vw,
+		CHASSIS_CONTROL_TIME, chassis_follow_gimbal_w_filter);
 	//最大 最小速度
 	chassis_init_t->vx_max_speed = NORMAL_MAX_CHASSIS_SPEED_X;
 	chassis_init_t->vx_min_speed = -NORMAL_MAX_CHASSIS_SPEED_X;

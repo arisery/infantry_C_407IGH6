@@ -11,6 +11,7 @@
 #include "CAN_Receive.h"
 #include "PID.h"
 #include"lib.h"
+#include "Vision.h"
 
 #define GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY 60.0f
 #define YAW_CHANNEL_TO_ANGLE 0.0015151f
@@ -56,6 +57,7 @@ typedef struct{
 	float yaw_max,yaw_min;
 	first_order_filter_type_t YAW_Filter,PITCH_Filter,slow_VX_set;
 	float test_yaw;
+	vision_t vision;
 }gimbal_t;
 #define Pitch_Limit(pitch) if ( pitch> 17.0f)		\
 	{											\
