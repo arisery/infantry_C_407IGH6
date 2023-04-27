@@ -138,8 +138,7 @@ void chassis_set_contorl(chassis_struct_t *chassis_control)
 
 		if ((fabs(Vx) < 0.05f)||(fabs(Vy)<0.05f))
 		{
-			wz_set = 0;
-			first_order_filter_cali(&chassis_control->chassis_follow_gimbal_vw,0);
+			Vw = 0;
 		}
 		else
 		{
@@ -161,10 +160,11 @@ void chassis_set_contorl(chassis_struct_t *chassis_control)
 			{
 				Vw=-Max_follow_gimbal_w;
 			}
-			else
-			first_order_filter_cali(&chassis_control->chassis_follow_gimbal_vw,Vw);
-			wz_set= chassis_control->chassis_follow_gimbal_vw.out;
+
+
 		}
+		first_order_filter_cali(&chassis_control->chassis_follow_gimbal_vw,Vw);
+			wz_set= chassis_control->chassis_follow_gimbal_vw.out;
 		first_order_filter_cali(&chassis_control->chassis_cmd_slow_set_vw, 0);
 	}
 	if (chassis_control->move_mode == easy_chassis)
