@@ -13,6 +13,7 @@
 uint32_t rx_count=0;
 MSG_t MSG;
 extern gimbal_t gimbal;
+Referee_t referee;
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
 	if (huart == &huart6)
@@ -29,7 +30,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 //		}
 		//printf("X:%d,\tY:%d\tDis:%d\r\n", vision_rx[1], vision_rx[2], vision_rx[3]);
 
-	if(Size==16){
+	if(Size==18){
 		switch(MSG.ID)
 		{
 			case vision_e :
@@ -40,8 +41,12 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 			case move_e :
 
 				break;
-			case trail_e :
-
+			case referee_e :
+				referee.blood.blood_f=MSG.array[1]<<16|MSG.array[0];
+				referee.watt.watt_f=MSG.array[3]<<16|MSG.array[2];
+				referee.joule=MSG.array[4];
+				referee.bullet_speed=MSG.array[5];
+				referee.level=MSG.array[6];
 				break;
 		}
 	}
