@@ -317,9 +317,9 @@ void chassis_task()
 		chassis.wheel[0].set_current = chassis.wheel[1].set_current = chassis.wheel[2].set_current =
 				chassis.wheel[3].set_current = 0;
 	}
-	set_motor_voltage_CAN1(StdId_3508, chassis.wheel[0].set_current,
-			chassis.wheel[1].set_current, chassis.wheel[2].set_current,
-			chassis.wheel[3].set_current);
+//	set_motor_voltage_CAN1(StdId_3508, chassis.wheel[0].set_current,
+//			chassis.wheel[1].set_current, chassis.wheel[2].set_current,
+//			chassis.wheel[3].set_current);
 
 }
 void chassis_init(chassis_struct_t *chassis_init_t)

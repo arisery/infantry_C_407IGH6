@@ -37,26 +37,26 @@ typedef struct
 typedef struct
 {
 	//血量
-	union
-	{
-		int32_t blood_i;
-		float blood_f;
-	} blood;
+	int16_t blood;
 
 	//功率
 	union
-		{
-	float watt_f;
-	int32_t watt_i;
-		}watt;
+	{
+		float watt_f;
+		int32_t watt_i;
+	} watt;
 	//缓冲
 	int16_t joule;
 
 	//弹速
-	int16_t bullet_speed;
+	union
+	{
+		int16_t bullet_speed_i;
+		float bullet_speed_f;
+	} bullet_speed;
 	//等级
 	int16_t level;
-}Referee_t;
+} Referee_t;
 typedef struct
 {
 	int16_t x_move;

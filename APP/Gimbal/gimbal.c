@@ -18,6 +18,8 @@
 #include "string.h"
 #include "key.h"
 #include "Vision.h"
+
+
 float time = 0, val_an;
 float temp, an, b, vision_sense_x = 50.0, vision_sense_y = 200.0;
 uint8_t vision_counter = 0;
@@ -64,14 +66,21 @@ void gimbal_init()
 
 	}
 	gimbal.axis[yaw].motor.round = 0;
+#ifdef shaobing
+	gimbal.axis[yaw].motor.offset_ecd = 6400;
+#else
 	gimbal.axis[yaw].motor.offset_ecd = 560;
+#endif
 	gimbal.axis[yaw].motor.angle = gimbal.axis[yaw].motor.round * 360.0f+
 	(gimbal.axis[yaw].motor.motor_feedback->encoder_value-gimbal.axis[yaw].motor.offset_ecd)*Motor_Ecd_to_Angle;
 
 	gimbal.gimbal_yaw_set = gimbal.axis[yaw].motor.angle;
 	gimbal.INS_yaw_set = gimbal.INS_yaw;
-
+#ifdef shaobing
+	gimbal.axis[pitch].motor.offset_ecd = 3400;
+#else
 	gimbal.axis[pitch].motor.offset_ecd = 4176;
+#endif
 	gimbal.axis[pitch].motor.round = 0;
 
 	first_order_filter_init(&gimbal.YAW_Filter, 0.006, yaw_filter);
@@ -356,7 +365,21 @@ void gimbal_task()
 	gimbal_data_update(&gimbal);
 	gimbal_set_control(&gimbal);
 	gimbal_pid_control(&gimbal);
+#ifdef shaobing
+	if (gimbal.mode == omnidirectional)
+	{
+		set_motor_voltage_CAN2(StdId_6020, gimbal.axis[yaw].set_current, gimbal.axis[pitch].set_current, 0, 0);
+//
+	}
+	else
+	{
+		set_motor_voltage_CAN2(StdId_6020, gimbal.axis[yaw].set_current, gimbal.axis[pitch].set_current,
+				shoot.Friction.FrictionMotor[0].set_current, shoot.Friction.FrictionMotor[1].set_current);
 
+	}
+
+}
+#else
 	if (gimbal.mode == omnidirectional)
 	{
 		set_motor_voltage_CAN2(StdId_6020, gimbal.axis[yaw].set_current, -gimbal.axis[pitch].set_current, 0, 0);
@@ -370,4 +393,4 @@ void gimbal_task()
 	}
 
 } //gimbal.axis[pitch].set_current
-
+#endif

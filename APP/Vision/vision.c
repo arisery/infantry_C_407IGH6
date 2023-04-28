@@ -5,12 +5,11 @@
  *      Author: arisery
  */
 
-
 #include "vision.h"
 #include "main.h"
 #include "usart.h"
 #include "gimbal.h"
-uint32_t rx_count=0;
+uint32_t rx_count = 0;
 MSG_t MSG;
 extern gimbal_t gimbal;
 Referee_t referee;
@@ -30,30 +29,30 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 //		}
 		//printf("X:%d,\tY:%d\tDis:%d\r\n", vision_rx[1], vision_rx[2], vision_rx[3]);
 
-	if(Size==18){
-		switch(MSG.ID)
+		if (Size == 18)
 		{
-			case vision_e :
-				gimbal.vision.x_set=MSG.array[0];
-				gimbal.vision.y_set=MSG.array[1];
-				rx_count++;
-				break;
-			case move_e :
+			switch (MSG.ID)
+			{
+				case vision_e:
+					gimbal.vision.x_set = MSG.array[0];
+					gimbal.vision.y_set = MSG.array[1];
+					rx_count++;
+					break;
+				case move_e:
 
-				break;
-			case referee_e :
-				referee.blood.blood_f=MSG.array[1]<<16|MSG.array[0];
-				referee.watt.watt_f=MSG.array[3]<<16|MSG.array[2];
-				referee.joule=MSG.array[4];
-				referee.bullet_speed=MSG.array[5];
-				referee.level=MSG.array[6];
-				break;
+					break;
+				case referee_e:
+					referee.blood = MSG.array[0];
+					referee.watt.watt_i = MSG.array[2] << 16 | MSG.array[1];
+					referee.joule = MSG.array[3];
+					referee.bullet_speed.bullet_speed_i = MSG.array[4] << 16 | MSG.array[5];
+					referee.level = MSG.array[6];
+					break;
+			}
 		}
-	}
 		HAL_UARTEx_ReceiveToIdle_DMA(&huart6, (uint8_t*) &MSG, 32);
 	}
 }
-
 
 void vision_RX_init()
 {
