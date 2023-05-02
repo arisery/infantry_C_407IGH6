@@ -37,7 +37,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+extern float speed_low ;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -68,7 +68,7 @@ osStaticThreadDef_t defaultTaskControlBlock;
 osThreadId GimbalHandle;
 uint32_t GimbalBuffer[ 1024 ];
 osStaticThreadDef_t GimbalControlBlock;
-osThreadId myTask04Handle;
+osThreadId ChassisHandle;
 uint32_t myTask04Buffer[ 1024 ];
 osStaticThreadDef_t myTask04ControlBlock;
 osThreadId myTask05Handle;
@@ -86,7 +86,7 @@ osThreadId KEYHandle;
 
 void StartDefaultTask(void const * argument);
 void Gimbal_TASK(void const * argument);
-void Chassis_TASK(void const * argument);
+void Chassis_Tsak(void const * argument);
 void Shoot_TASK(void const * argument);
 void INS_task(void const * argument);
 void Detect_Task(void const * argument);
@@ -178,9 +178,9 @@ void MX_FREERTOS_Init(void) {
   osThreadStaticDef(Gimbal, Gimbal_TASK, osPriorityNormal, 0, 1024, GimbalBuffer, &GimbalControlBlock);
   GimbalHandle = osThreadCreate(osThread(Gimbal), NULL);
 
-  /* definition and creation of myTask04 */
-  osThreadStaticDef(myTask04, Chassis_TASK, osPriorityNormal, 0, 1024, myTask04Buffer, &myTask04ControlBlock);
-  myTask04Handle = osThreadCreate(osThread(myTask04), NULL);
+  /* definition and creation of Chassis */
+  osThreadStaticDef(Chassis, Chassis_Tsak, osPriorityNormal, 0, 1024, myTask04Buffer, &myTask04ControlBlock);
+  ChassisHandle = osThreadCreate(osThread(Chassis), NULL);
 
   /* definition and creation of myTask05 */
   osThreadStaticDef(myTask05, Shoot_TASK, osPriorityNormal, 0, 1024, myTask05Buffer, &myTask05ControlBlock);
@@ -218,17 +218,18 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  osDelay(10);
-	   vTaskList(ptrTaskList);
-	    printf("**********************************************\r\n");
-	    osDelay(10);
-	    printf("Task        State    Prio    Stack    Num\r\n");
-	   // printf("%s",ptrTaskList);
-	    osDelay(10);
-	    HAL_UART_Transmit_DMA(&huart1, ptrTaskList, 500);
-	    osDelay(10);
-	    printf("**********************************************\r\n");
-    osDelay(1000);
+//	  osDelay(10);
+//	   vTaskList(ptrTaskList);
+//	    printf("**********************************************\r\n");
+//	    osDelay(10);
+//	    printf("Task        State    Prio    Stack    Num\r\n");
+//	   // printf("%s",ptrTaskList);
+//	    osDelay(10);
+//	    HAL_UART_Transmit_DMA(&huart1, ptrTaskList, 500);
+//	    osDelay(10);
+//	    printf("**********************************************\r\n");
+//    osDelay(30000);
+//     speed_low = 25;
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -257,28 +258,22 @@ void Gimbal_TASK(void const * argument)
   /* USER CODE END Gimbal_TASK */
 }
 
-/* USER CODE BEGIN Header_Chassis_TASK */
+/* USER CODE BEGIN Header_Chassis_Tsak */
 /**
-* @brief Function implementing the myTask04 thread.
+* @brief Function implementing the Chassis thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_Chassis_TASK */
-void Chassis_TASK(void const * argument)
+/* USER CODE END Header_Chassis_Tsak */
+__weak void Chassis_Tsak(void const * argument)
 {
-  /* USER CODE BEGIN Chassis_TASK */
-	osDelay(10);
-	printf("Chassis Task Start...\r\n");
-	osDelay(1000);
-
-	chassis_init(&chassis);
+  /* USER CODE BEGIN Chassis_Tsak */
   /* Infinite loop */
   for(;;)
   {
-		chassis_task();
-			  osDelay(5);
+    osDelay(1);
   }
-  /* USER CODE END Chassis_TASK */
+  /* USER CODE END Chassis_Tsak */
 }
 
 /* USER CODE BEGIN Header_Shoot_TASK */

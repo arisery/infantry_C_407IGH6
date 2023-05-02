@@ -26,7 +26,7 @@ void task_init()
 	LED_OFF_ALL();
 
 	uart_dma_init();
-	can_filter_init();
+	CAN_Filter_Init();
 	//chassis_init(&chassis);
 	//gimbal_init();
 	//sync_init();

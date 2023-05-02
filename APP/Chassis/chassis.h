@@ -21,11 +21,9 @@
 
 //底盘的移动模式
 typedef enum{
-	follow_chassis,//底盘随意动作
 	easy_chassis,//小陀螺
-	follow_gimbal,//底盘跟随云台
-
-	no_rotary,//底盘不能选择，可以移动
+	Follow_Gimbal,//底盘跟随云台
+	Follow_Chassis,//底盘不能选择，可以移动
 	independent,//独立移动，不与其他车辆联动
 	sync,//与其他车辆同步，发生相同的遥控信息
 	contrary,//与其他车辆互动，发生的相反的遥控信息
@@ -93,11 +91,11 @@ typedef struct {
 //底盘电机最大速度
 #define MAX_WHEEL_SPEED 35.0f
 //底盘运动过程最大前进速度.0
-#define NORMAL_MAX_CHASSIS_SPEED_X 2.0f
+#define NORMAL_MAX_CHASSIS_SPEED_X 5.0f
 //底盘运动过程最大平移速度
-#define NORMAL_MAX_CHASSIS_SPEED_Y 2.0f
+#define NORMAL_MAX_CHASSIS_SPEED_Y 5.0f
 //底盘运动过程最大旋转速度
-#define NORMAL_MAX_CHASSIS_SPEED_WZ 8.0f
+#define NORMAL_MAX_CHASSIS_SPEED_WZ 12.0f
 //底盘设置旋转速度，设置前后左右轮不同设定速度的比例分权 0为在几何中心，不需要补偿
 #define CHASSIS_WZ_SET_SCALE 0.0f
 
@@ -114,15 +112,17 @@ typedef struct {
 //底盘任务控制间隔 0.002s
 #define CHASSIS_CONTROL_TIME 0.006
 //底盘任务控制频率，尚未使用这个宏
-#define CHASSIS_CONTROL_FREQUENCE 500.0f
+#define CHASSIS_CONTROL_FREQUENCE 166.0f
 //最大输出电流
-#define MAX_MOTOR_CAN_CURRENT 10000.0f
+#define MAX_MOTOR_CAN_CURRENT 16000.0f
 
 #define CHASSIS_ACCEL_X_NUM 0.1666666667f
 #define CHASSIS_ACCEL_Y_NUM 0.3333333333f
 #define CHASSIS_ACCEL_W_NUM 1.0f
 
 //m3508转化成底盘速度(m/s)的比例，做两个宏 是因为可能换电机需要更换比例
+//3508减速比为19，轮直径为152mm
+//   1/(60*19*0.152*PI)
 #define M3508_MOTOR_RPM_TO_VECTOR 0.000415809748903494517209f
 #define CHASSIS_MOTOR_RPM_TO_VECTOR_SEN M3508_MOTOR_RPM_TO_VECTOR
 
@@ -144,9 +144,9 @@ typedef struct {
 #define KEYBOARD_NORMAL_CHASSIS_SPEED_W		1.0f
 #define KEYBOARD_MAX_CHASSIS_SPEED_W		2.5f
 
-
-#define rc_deadline_limit(input, output, dealine)        \
-    {                                                    \
+//死区控制，小于deadline的默认为0
+#define rc_deadline_limit(input, output, dealine)         \
+    {                                                 \
         if ((input) > (dealine) || (input) < -(dealine)) \
         {                                                \
             (output) = (input);                          \
@@ -159,13 +159,13 @@ typedef struct {
 
 
 
-void chassis_mode_set(chassis_struct_t* chassis_t);
-void chassis_data_update(chassis_struct_t* chassis_update);
-void chassis_set_contorl(chassis_struct_t *chassis_control);
-void chassis_rc_to_control_vector(double *vx_set, double *vy_set,chassis_struct_t *chassis_move_rc_to_vector);
-void chassis_pid_control(chassis_struct_t* chassis_pid);
+void Chassis_ModeSet(chassis_struct_t* chassis_t);
+void Chassis_Update(chassis_struct_t* chassis_update);
+void Chassis_SetControl(chassis_struct_t *chassis_control);
+void Chassis_RCtoControlVector(double *vx_set, double *vy_set,chassis_struct_t *chassis_move_rc_to_vector);
+void Chassis_PID_Calculate(chassis_struct_t* chassis_pid);
 void chassis_mecanum_wheel_speed(const float vx_set,const float vy_set, const float wz_set, float wheel_speed[4]);
-void chassis_task();
-void chassis_init(chassis_struct_t *chassis_init_t);
+void Chassis_Task(void const * argument);
+void Chassis_Init(chassis_struct_t *chassis_init_t);
 
 #endif /* CHASSIS_CHASSIS_H_ */

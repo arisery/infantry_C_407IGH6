@@ -46,24 +46,24 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#ifdef __GNUC__
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
-PUTCHAR_PROTOTYPE
-{
-	/* Place your implementation of fputc here */
-	/* e.g. write a character to the USART */
-	huart1.Instance->DR = (uint8_t) ch;
-
-	/* Loop until the end of transmission */
-	while (__HAL_UART_GET_FLAG(&uart_user, UART_FLAG_TC) == RESET)
-	{
-	}
-
-	return ch;
-}
+//#ifdef __GNUC__
+//#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+//#else
+//#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+//#endif /* __GNUC__ */
+//PUTCHAR_PROTOTYPE
+//{
+//	/* Place your implementation of fputc here */
+//	/* e.g. write a character to the USART */
+//	huart1.Instance->DR = (uint8_t) ch;
+//
+//	/* Loop until the end of transmission */
+//	while (__HAL_UART_GET_FLAG(&uart_user, UART_FLAG_TC) == RESET)
+//	{
+//	}
+//
+//	return ch;
+//}
 
 
 

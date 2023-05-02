@@ -15,23 +15,23 @@
 extern gimbal_t gimbal;
 extern KEY_T mouse_L, mouse_R,Key_Q;
 float add_angle = 50.0f;
-float supply_speed_set = -200;
+float supply_speed_set = -200;//-200
 shoot_t shoot;
 uint8_t quit_flag = 0,fric_speed_switch=0;
 float R_Fric = 0.05;
-float speed_low = 25, speed_normal = 40, speed_high = 60;
+float speed_low = 30.3, speed_normal = 40, speed_high = 60;//25
 float fricRPM2speed = 0.005235987f;
 void shoot_init()
 {
 
 	float ShootFilter[1] = { 0.02f };
-	float Supply_PID_Angle[3] = { 1, 0, -0.1 }, Supply_PID_Speed[3] = { 50, 0.05, -1 };
-	float Friction_PID[3] = { 600, 2.0f, -15.0 };
+	float Supply_PID_Angle[3] = { 1, 0, -0.1 }, Supply_PID_Speed[3] = { 60, 0.1, -1 };
+	float Friction_PID[3] = { 600, 1.0f, -15.0 };
 	shoot_speed_set(0);
 	shoot.RC = get_remote_control_point();
-	shoot.Supply.SupplyMotor.motor_feedback = get_shoot_Motor_Measure_Point();
-	shoot.Friction.FrictionMotor[0].motor_feedback = get_friction_Motor_Measure_Point(0);
-	shoot.Friction.FrictionMotor[1].motor_feedback = get_friction_Motor_Measure_Point(1);
+	shoot.Supply.SupplyMotor.motor_feedback = Get_SupplyMotor_MessagePoint();
+	shoot.Friction.FrictionMotor[0].motor_feedback = Get_FrictionMotor_MessagePoint(0);
+	shoot.Friction.FrictionMotor[1].motor_feedback = Get_FrictionMotor_MessagePoint(1);
 	PID_clear(&shoot.Supply.pid_angle);
 	PID_clear(&shoot.Supply.pid_speed);
 	PID_Init(&shoot.Supply.pid_angle, PID_POSITION, Supply_PID_Angle, 1000, 30);
@@ -127,14 +127,18 @@ void shoot_data_update(shoot_t *update)
 	{
 		if(Key_Q.state==key_release)
 		{
-			if(speed_low==25)
+			if(speed_low==30.3)
 			{
 				speed_low=0;
 			}
 			else if(speed_low==0)
 			{
-				speed_low=25;
+				speed_low=30.3;
 			}
+//			else if(speed_low==25)
+//			{
+//				speed_low=0;
+//			}
 			fric_speed_switch=0;
 		}
 	}
@@ -234,6 +238,6 @@ void shoot_pid_control(shoot_t *shoot_pid)
 	shoot_pid->Friction.FrictionMotor[1].set_current = PID_Calc(&shoot_pid->Friction.pid_right,
 			shoot_pid->Friction.FrictionMotor[1].speed, -shoot_pid->Friction.SetSpeed);
 	//发送拨弹轮电流值
-	set_motor_voltage_CAN1(StdId_2006, shoot_pid->Supply.set_current, 0, 0, 0); //
+	SetMotorVoltage_CAN1(StdId_2006, shoot_pid->Supply.set_current, 0, 0, 0); //
 }
 

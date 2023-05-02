@@ -33,6 +33,7 @@ typedef struct
 {
 	int16_t x_set;
 	int16_t y_set;
+	int16_t OpenFire;
 } vision_t;
 typedef struct
 {
@@ -61,6 +62,7 @@ typedef struct
 {
 	int16_t x_move;
 	int16_t y_move;
+
 } shaobing_t;
 
 void vision_RX_init();

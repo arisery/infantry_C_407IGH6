@@ -12,7 +12,7 @@
 #include "PID.h"
 #include"lib.h"
 #include "Vision.h"
-#define shaobing 1
+//#define shaobing 1
 #define GIMBAL_MOTOR_RPM_TO_ANGULAR_VELOCITY 60.0f
 #define YAW_CHANNEL_TO_ANGLE 0.0015151f
 
@@ -52,7 +52,7 @@ typedef struct{
 	float gimbal_yaw,gimbal_yaw_set;
 	float gimbal_pitch,gimbal_pitch_set;
 	float gimbal_roll,gimbal_roll_set;
-	float INS_yaw,INS_yaw_set,INS_pitch,INS_pitch_set;
+	float INS_yaw,INS_yaw_set,INS_yaw_vision_set,INS_pitch_vision_set,INS_pitch,INS_pitch_set;
 	float pitch_max,pitch_min;
 	float yaw_max,yaw_min;
 	first_order_filter_type_t YAW_Filter,PITCH_Filter,slow_VX_set;
@@ -73,9 +73,9 @@ else if (pitch < -30)						\
 	{											\
 	pitch = 17.0f;								\
 	}											\
-	else if (pitch < -30)						\
+	else if (pitch < -25)						\
 	{											\
-		pitch = -30.0f;							\
+		pitch = -25.0f;							\
 	}
 #endif
 float motor_ecd_to_angle_change(motor_t *motor);
