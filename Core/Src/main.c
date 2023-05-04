@@ -139,7 +139,7 @@ int main(void)
   MX_TIM8_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
-    HAL_UART_Transmit(&huart1, "hello", 5, 0xff);
+    HAL_UART_Transmit(&huart1, (uint8_t*)"hello", 5, 0xff);
   printf("System Start...\r\n");
 HAL_Delay(100);
   task_init();
