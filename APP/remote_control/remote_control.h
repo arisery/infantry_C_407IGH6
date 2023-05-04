@@ -85,9 +85,9 @@ typedef struct
 	} keyboard;
 
 } RC_ctrl_t;
-void uart_dma_init();
+void UART_IDLE_DMA_Init();
 void HAL_UART_IdleCpltCallback(UART_HandleTypeDef *huart);
-extern const RC_ctrl_t* get_remote_control_point(void);
+extern const RC_ctrl_t* Get_RemoteControl_Point(void);
 void SBUS_TO_RC(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl);
 uint8_t RC_data_is_error(void);
 #endif /* APP_REMOTE_CONTROL_REMOTE_CONTROL_H_ */

@@ -30,7 +30,7 @@ void Chassis_Init(chassis_struct_t *chassis_init_t)
 	const static float chassis_w_order_filter[1] = { CHASSIS_ACCEL_W_NUM };
 	const static float chassis_follow_gimbal_w_filter[1] = { 0.3333f };
 	//获取遥控数据地址
-	chassis_init_t->RC = get_remote_control_point();
+	chassis_init_t->RC = Get_RemoteControl_Point();
 	//初始化PID
 
 	for (uint8_t i = 0; i < 4; i++)
@@ -49,12 +49,13 @@ void Chassis_Init(chassis_struct_t *chassis_init_t)
 	first_order_filter_init(&chassis_init_t->chassis_follow_gimbal_vw,
 	CHASSIS_CONTROL_TIME, chassis_follow_gimbal_w_filter);
 	//设置底盘最大、最小速度
+	/***********************************************/
 	chassis_init_t->vx_max_speed = NORMAL_MAX_CHASSIS_SPEED_X;
 	chassis_init_t->vx_min_speed = -NORMAL_MAX_CHASSIS_SPEED_X;
-
+	/***************************************************/
 	chassis_init_t->vy_max_speed = NORMAL_MAX_CHASSIS_SPEED_Y;
 	chassis_init_t->vy_min_speed = -NORMAL_MAX_CHASSIS_SPEED_Y;
-
+	/************************************************/
 	chassis_init_t->wz_max_speed = NORMAL_MAX_CHASSIS_SPEED_Y;
 	chassis_init_t->wz_min_speed = -NORMAL_MAX_CHASSIS_SPEED_Y;
 	//更新一下数据

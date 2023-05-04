@@ -24,16 +24,10 @@ uint32_t tim6cnt;
 void task_init()
 {
 	LED_OFF_ALL();
-
-	uart_dma_init();
+	UART_IDLE_DMA_Init();
 	CAN_Filter_Init();
-	//chassis_init(&chassis);
-	//gimbal_init();
-	//sync_init();
 	HAL_Delay(2000);
 	vision_RX_init();
 
-// HAL_TIM_Base_Start_IT(&htim3);
- //HAL_TIM_Base_Start(&htim6);
 }
 

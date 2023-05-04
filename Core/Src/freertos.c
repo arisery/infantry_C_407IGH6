@@ -69,8 +69,8 @@ osThreadId GimbalHandle;
 uint32_t GimbalBuffer[ 1024 ];
 osStaticThreadDef_t GimbalControlBlock;
 osThreadId ChassisHandle;
-uint32_t myTask04Buffer[ 1024 ];
-osStaticThreadDef_t myTask04ControlBlock;
+uint32_t ChassisBuffer[ 1024 ];
+osStaticThreadDef_t ChassisControlBlock;
 osThreadId myTask05Handle;
 uint32_t myTask05Buffer[ 1024 ];
 osStaticThreadDef_t myTask05ControlBlock;
@@ -85,7 +85,7 @@ osThreadId KEYHandle;
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
-void Gimbal_TASK(void const * argument);
+void Gimbal_Task(void const * argument);
 void Chassis_Tsak(void const * argument);
 void Shoot_TASK(void const * argument);
 void INS_task(void const * argument);
@@ -175,11 +175,11 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of Gimbal */
-  osThreadStaticDef(Gimbal, Gimbal_TASK, osPriorityNormal, 0, 1024, GimbalBuffer, &GimbalControlBlock);
+  osThreadStaticDef(Gimbal, Gimbal_Task, osPriorityNormal, 0, 1024, GimbalBuffer, &GimbalControlBlock);
   GimbalHandle = osThreadCreate(osThread(Gimbal), NULL);
 
   /* definition and creation of Chassis */
-  osThreadStaticDef(Chassis, Chassis_Tsak, osPriorityNormal, 0, 1024, myTask04Buffer, &myTask04ControlBlock);
+  osThreadStaticDef(Chassis, Chassis_Tsak, osPriorityNormal, 0, 1024, ChassisBuffer, &ChassisControlBlock);
   ChassisHandle = osThreadCreate(osThread(Chassis), NULL);
 
   /* definition and creation of myTask05 */
@@ -234,28 +234,22 @@ void StartDefaultTask(void const * argument)
   /* USER CODE END StartDefaultTask */
 }
 
-/* USER CODE BEGIN Header_Gimbal_TASK */
+/* USER CODE BEGIN Header_Gimbal_Task */
 /**
 * @brief Function implementing the Gimbal thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_Gimbal_TASK */
-void Gimbal_TASK(void const * argument)
+/* USER CODE END Header_Gimbal_Task */
+__weak void Gimbal_Task(void const * argument)
 {
-  /* USER CODE BEGIN Gimbal_TASK */
-	printf("Gimbal Task Start...\r\n");
-	osDelay(1000);
-	gimbal_init();
-
+  /* USER CODE BEGIN Gimbal_Task */
   /* Infinite loop */
   for(;;)
   {
-	//  Toggle_LED_R;
-	  gimbal_task();
-    osDelay(5);
+    osDelay(1);
   }
-  /* USER CODE END Gimbal_TASK */
+  /* USER CODE END Gimbal_Task */
 }
 
 /* USER CODE BEGIN Header_Chassis_Tsak */

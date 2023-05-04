@@ -222,8 +222,8 @@ uint32_t micros()
 }
 void  delay_us( uint16_t num){
 
-	uint32_t tickstart=micros();
-	uint16_t delay=num+1;
+//	uint32_t tickstart=micros();
+//	uint16_t delay=num+1;
 	/*while((micros()-tickstart)<delay)
 	{
 

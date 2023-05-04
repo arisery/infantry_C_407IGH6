@@ -79,11 +79,11 @@ else if (pitch < -30)						\
 	}
 #endif
 float motor_ecd_to_angle_change(motor_t *motor);
-void gimbal_mode_set(gimbal_t* gimbal_mode);
-void gimbal_data_update(gimbal_t* gimbal_data);
-void gimbal_set_control(gimbal_t* gimbal_set);
-void gimbal_pid_control(gimbal_t* gimbal_pid);
-void gimbal_task();
-void gimbal_init();
+void Gimbal_ModeSet(gimbal_t* gimbal_mode);
+void Gimbal_Update(gimbal_t* gimbal_data);
+void Gimbal_SetControl(gimbal_t* gimbal_set);
+void Gimbal_PID_Control(gimbal_t* gimbal_pid);
+void Gimbal_Task(void const * argument);
+void Gimbal_Init();
 
 #endif /* GIMBAL_GIMBAL_H_ */

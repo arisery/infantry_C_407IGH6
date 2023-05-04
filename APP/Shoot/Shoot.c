@@ -28,7 +28,7 @@ void shoot_init()
 	float Supply_PID_Angle[3] = { 1, 0, -0.1 }, Supply_PID_Speed[3] = { 60, 0.1, -1 };
 	float Friction_PID[3] = { 600, 1.0f, -15.0 };
 	shoot_speed_set(0);
-	shoot.RC = get_remote_control_point();
+	shoot.RC = Get_RemoteControl_Point();
 	shoot.Supply.SupplyMotor.motor_feedback = Get_SupplyMotor_MessagePoint();
 	shoot.Friction.FrictionMotor[0].motor_feedback = Get_FrictionMotor_MessagePoint(0);
 	shoot.Friction.FrictionMotor[1].motor_feedback = Get_FrictionMotor_MessagePoint(1);
