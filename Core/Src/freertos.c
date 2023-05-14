@@ -86,7 +86,7 @@ osThreadId KEYHandle;
 
 void StartDefaultTask(void const * argument);
 void Gimbal_Task(void const * argument);
-void Chassis_Tsak(void const * argument);
+void Chassis_Task(void const * argument);
 void Shoot_TASK(void const * argument);
 void INS_task(void const * argument);
 void Detect_Task(void const * argument);
@@ -179,7 +179,7 @@ void MX_FREERTOS_Init(void) {
   GimbalHandle = osThreadCreate(osThread(Gimbal), NULL);
 
   /* definition and creation of Chassis */
-  osThreadStaticDef(Chassis, Chassis_Tsak, osPriorityNormal, 0, 1024, ChassisBuffer, &ChassisControlBlock);
+  osThreadStaticDef(Chassis, Chassis_Task, osPriorityNormal, 0, 1024, ChassisBuffer, &ChassisControlBlock);
   ChassisHandle = osThreadCreate(osThread(Chassis), NULL);
 
   /* definition and creation of myTask05 */
@@ -252,22 +252,22 @@ __weak void Gimbal_Task(void const * argument)
   /* USER CODE END Gimbal_Task */
 }
 
-/* USER CODE BEGIN Header_Chassis_Tsak */
+/* USER CODE BEGIN Header_Chassis_Task */
 /**
 * @brief Function implementing the Chassis thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_Chassis_Tsak */
-__weak void Chassis_Tsak(void const * argument)
+/* USER CODE END Header_Chassis_Task */
+__weak void Chassis_Task(void const * argument)
 {
-  /* USER CODE BEGIN Chassis_Tsak */
+  /* USER CODE BEGIN Chassis_Task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END Chassis_Tsak */
+  /* USER CODE END Chassis_Task */
 }
 
 /* USER CODE BEGIN Header_Shoot_TASK */

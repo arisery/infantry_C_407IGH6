@@ -85,7 +85,7 @@ void Gimbal_Init()
 	gimbal.axis[pitch].motor.offset_ecd = 3400;
 #else
 	gimbal.axis[yaw].motor.offset_ecd = 7045; //  7120
-	gimbal.axis[pitch].motor.offset_ecd = 6612; //3260
+	gimbal.axis[pitch].motor.offset_ecd = 5840; //3260
 #endif
 	//更新一下YAW轴角度
 	gimbal.axis[yaw].motor.angle = gimbal.axis[yaw].motor.round * 360.0f+

@@ -69,13 +69,13 @@ else if (pitch < -30)						\
 	pitch = -30.0f;							\
 }
 #else
-#define Pitch_Limit(pitch) if ( pitch> 17.0f)		\
+#define Pitch_Limit(pitch) if ( pitch> 9.0f)		\
 	{											\
-	pitch = 17.0f;								\
+	pitch = 9.0f;								\
 	}											\
-	else if (pitch < -25)						\
+	else if (pitch < -20)						\
 	{											\
-		pitch = -25.0f;							\
+		pitch = -20.0f;							\
 	}
 #endif
 float motor_ecd_to_angle_change(motor_t *motor);
